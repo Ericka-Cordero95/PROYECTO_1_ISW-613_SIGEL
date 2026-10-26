@@ -81,6 +81,15 @@ en una instalación nueva.
 
 El script crea la base de datos sigel y las tablas implementadas.
 
+### Configurar la conexión a MySQL
+
+Copiar config/config.example.php como config/config.local.php.
+
+Editar la copia con el servidor, puerto, nombre de base de datos,
+usuario y contraseña de MySQL correspondientes al entorno local.
+
+config.local.php está excluido de Git y debe permanecer fuera de public/.
+
 ### 5. Comprobar el acceso
 
 Abrir http://sigel.local.
@@ -89,7 +98,6 @@ Efectivamente se mostro el mensaje:
 
 SIGEL: el virtual host funciona.
 
-## Credenciales de prueba
 
 ## Credenciales de prueba
 
