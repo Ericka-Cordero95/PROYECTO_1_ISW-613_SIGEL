@@ -14,10 +14,10 @@ Se desarrolla con PHP y MySQL/MariaDB.
 
 ## Estado actual
 
-- Estructura inicial del proyecto.
-- Virtual host local configurado.
-- Página de prueba ejecutada desde public/index.php.
-- Script de creación de la base de datos y tablas de roles y usuarios.
+- Conexión PDO comprobada con la base de datos.
+- Configuración privada excluida de Git y plantilla de instalación.
+- Registro privado de errores con mensajes genéricos al usuario.
+- Inicio de sesiones con cookie HttpOnly y SameSite=Lax.
 
 ## Requisitos
 
@@ -110,6 +110,24 @@ Cuentas destinadas exclusivamente al entorno local de demostración.
 
 Después de importar sql/schema.sql en una instalación nueva,
 importar sql/seed.sql para crear los roles y usuarios de prueba.
+
+## Sesiones y manejo de errores
+
+Las páginas y acciones cargan includes/bootstrap.php antes de generar
+contenido. Este archivo configura los errores y carga las funciones
+de conexión y el inicio de sesión.
+
+Los detalles de errores se guardan en storage/logs/php-error.log,
+fuera del directorio público y excluidos de Git.
+
+La cookie sigel_session contiene el identificador de sesión.
+Los datos de la sesión se conservan en el servidor.
+
+La cookie utiliza HttpOnly, SameSite=Lax y Secure cuando el sitio
+se sirve mediante HTTPS. El entorno local actual utiliza HTTP.
+
+La autenticación, la regeneración del identificador al autenticar,
+la expiración por inactividad y el cierre de sesión están pendientes.
 
 ## Estructura del proyecto
 
