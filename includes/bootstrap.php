@@ -30,3 +30,7 @@ require_once __DIR__ . '/../config/database.php';
 
 //Configura e inicia la sesion antes de generar contenido.
 require_once __DIR__ . '/session.php';
+
+//Carga las funciones para escapar texto y proteger formularios.
+require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/csrf.php';
