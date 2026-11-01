@@ -10,3 +10,9 @@ function escapar(string $valor): string
         'UTF-8'
     );
 }
+// Envía al navegador a otra página y termina el código.
+function redirigir(string $ruta): void
+{
+    header('Location: ' . $ruta, true, 303);
+    exit;
+}

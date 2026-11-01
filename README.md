@@ -6,12 +6,10 @@ Estudiante: Ericka Cordero.
 
 ## Descripción
 
-Aplicación web para gestionar equipos y préstamos de un laboratorio
-universitario.
+Aplicación web para gestionar equipos y préstamos de un laboratorio universitario.
 
 El sistema tendrá dos roles: administrador y operador.
-Se desarrolla con PHP y MySQL/MariaDB, sin frameworks ni librerías
-de terceros.
+Se desarrolla con PHP y MySQL/MariaDB, sin frameworks ni librerías de terceros.
 
 ## Estado actual
 
@@ -23,6 +21,9 @@ de terceros.
 - Registro de errores en un archivo privado.
 - Inicio de sesiones configurado.
 - Funciones de escape HTML y CSRF probadas.
+- Login con correo y contraseña.
+- Página de inicio que requiere sesión.
+- Bloqueo de cinco minutos después de tres intentos incorrectos.
 
 ## Requisitos
 
@@ -64,8 +65,7 @@ Editar:
 C:\xampp\apache\conf\extra\httpd-vhosts.conf
 ```
 
-Agregar el siguiente bloque. Cambiar RUTA_DEL_PROYECTO por la ruta
-completa de la carpeta clonada, usando barras /.
+Agregar el siguiente bloque. Cambiar RUTA_DEL_PROYECTO por la ruta completa de la carpeta clonada, usando barras /.
 
 ```apache
 <VirtualHost *:80>
@@ -81,8 +81,7 @@ completa de la carpeta clonada, usando barras /.
 </VirtualHost>
 ```
 
-En C:\xampp\apache\conf\httpd.conf, comprobar que esta línea
-no tenga # al inicio:
+En C:\xampp\apache\conf\httpd.conf, comprobar que esta línea no tenga # al inicio:
 
 ```apache
 Include conf/extra/httpd-vhosts.conf
@@ -115,18 +114,16 @@ config.local.php no se sube a Git.
 
 ### 6. Comprobar el acceso
 
-Abrir:
+Con Apache y MySQL iniciados, abrir:
 
 http://sigel.local
 
-Por ahora se muestra:
-
-SIGEL: el virtual host funciona.
+Se muestra el formulario de inicio de sesión.
+Al entrar con una cuenta de prueba, se muestra su nombre y rol.
 
 ## Credenciales de prueba
 
 Estas cuentas son solo para pruebas locales.
-El formulario de login todavía está pendiente.
 
 | Rol | Correo | Contraseña |
 |---|---|---|
@@ -146,13 +143,11 @@ Las contraseñas se guardan como hashes en la base de datos.
 - public/pages/: páginas y formularios.
 - public/actions/: archivos que procesan las operaciones.
 
-Las carpetas para imágenes y recursos estáticos se completarán
-al desarrollar esos módulos.
+Las carpetas para imágenes y recursos estáticos se completarán al desarrollar esos módulos.
 
 ## Sesiones
 
-Las páginas y acciones cargarán includes/bootstrap.php antes
-de mostrar contenido.
+Las páginas y acciones cargan includes/bootstrap.php antes de mostrar contenido.
 
 La cookie sigel_session guarda el identificador de sesión.
 Los datos de la sesión se guardan en el servidor.
@@ -161,8 +156,10 @@ La cookie usa HttpOnly y SameSite=Lax.
 Secure se activa cuando el sitio utiliza HTTPS.
 El entorno local actual utiliza HTTP.
 
-Todavía faltan el login, la regeneración del identificador al entrar,
-el tiempo límite por inactividad y el cierre de sesión.
+Al iniciar sesión correctamente, se cambia el identificador con session_regenerate_id(true).
+Se guardan el ID, el nombre, el rol y la última actividad.
+
+Todavía faltan el tiempo límite por inactividad y el cierre de sesión.
 
 ## Manejo de errores
 
@@ -179,9 +176,11 @@ La función escapar() permite mostrar datos como texto en HTML.
 Utiliza htmlspecialchars() con ENT_QUOTES, ENT_SUBSTITUTE y UTF-8.
 
 El token CSRF se crea con random_bytes() y se guarda en la sesión.
-Los formularios lo enviarán en un campo oculto.
+El formulario de login lo envía en un campo oculto.
+La acción lo revisa con hash_equals() antes de procesar los datos.
 
-El servidor lo revisará con hash_equals() antes de realizar cambios.
+Después de entrar correctamente, se elimina el token anterior.
+El siguiente formulario generará uno nuevo.
 
 Se hicieron estas pruebas:
 
@@ -190,11 +189,40 @@ Se hicieron estas pruebas:
 - Cambiar el token y comprobar que el servidor rechaza el envío.
 
 La página temporal se eliminó después de las pruebas.
-Estas funciones se usarán en los formularios que se construyan.
+Los próximos formularios también deberán usar estas funciones.
+
+## Inicio de sesión
+
+El formulario envía el correo, la contraseña y el token CSRF.
+
+El servidor valida los datos y busca al usuario con una consulta preparada.
+La contraseña se revisa con password_verify().
+
+Las cuentas desactivadas o eliminadas no pueden entrar.
+
+Los primeros dos fallos muestran un mensaje para revisar los datos.
+El tercer fallo bloquea la cuenta durante cinco minutos y muestra el aviso de bloqueo.
+
+Intentar entrar durante el bloqueo no reinicia el tiempo.
+Cuando termina, se puede intentar nuevamente.
+
+Un acceso correcto limpia los fallos y permite entrar a la página de inicio.
+
+La página de inicio comprueba que exista un usuario en la sesión.
+El control de permisos por rol todavía está pendiente.
+
+## Pruebas del login
+
+Se comprobó lo siguiente:
+
+- Una cuenta sin bloqueo puede entrar con la contraseña correcta.
+- El primer y segundo fallo muestran el mensaje de datos incorrectos.
+- El tercer fallo muestra el mensaje de bloqueo.
+- Durante el bloqueo no se permite entrar, aunque la contraseña sea correcta.
 
 ## Pendientes
 
-- Login y control de acceso por rol.
+- Control de acceso por rol.
 - Cierre de sesión y expiración por inactividad.
 - CRUD de usuarios, categorías y equipos.
 - Búsqueda, paginación y eliminación lógica.
