@@ -24,6 +24,9 @@ Se desarrolla con PHP y MySQL/MariaDB, sin frameworks ni librerías de terceros.
 - Login con correo y contraseña.
 - Página de inicio que requiere sesión.
 - Bloqueo de cinco minutos después de tres intentos incorrectos.
+- Cierre de sesión por POST con token CSRF.
+- Expiración después de 15 minutos sin actividad.
+- Revisión de la cuenta en cada petición protegida.
 
 ## Requisitos
 
@@ -156,10 +159,21 @@ La cookie usa HttpOnly y SameSite=Lax.
 Secure se activa cuando el sitio utiliza HTTPS.
 El entorno local actual utiliza HTTP.
 
-Al iniciar sesión correctamente, se cambia el identificador con session_regenerate_id(true).
+Al entrar correctamente, se cambia el identificador de sesión.
 Se guardan el ID, el nombre, el rol y la última actividad.
 
-Todavía faltan el tiempo límite por inactividad y el cierre de sesión.
+La función requerirSesion() revisa que exista una sesión y que la cuenta
+siga activa y no esté eliminada. También actualiza el nombre y el rol
+desde la base de datos.
+
+Después de 15 minutos sin peticiones a páginas protegidas, la siguiente
+petición cierra la sesión y vuelve al login.
+
+El botón Cerrar sesión envía un formulario POST con token CSRF.
+Se borran los datos de la sesión, la cookie y la sesión del servidor.
+
+Las páginas protegidas envían Cache-Control: no-store para indicar
+al navegador que no debe guardarlas en caché.
 
 ## Manejo de errores
 
@@ -220,10 +234,21 @@ Se comprobó lo siguiente:
 - El tercer fallo muestra el mensaje de bloqueo.
 - Durante el bloqueo no se permite entrar, aunque la contraseña sea correcta.
 
+## Pruebas de sesión
+
+- Cerrar sesión vuelve al login y muestra un mensaje.
+- Abrir la página de inicio después de salir vuelve al login.
+- Abrir logout.php directamente por URL rechaza la petición.
+- La sesión termina por inactividad.
+- Desactivar una cuenta impide que siga usando una página protegida.
+
+Para probar la inactividad se usaron temporalmente 30 segundos.
+Después de la prueba, el límite se dejó en 900 segundos, equivalentes
+a 15 minutos.
+
 ## Pendientes
 
 - Control de acceso por rol.
-- Cierre de sesión y expiración por inactividad.
 - CRUD de usuarios, categorías y equipos.
 - Búsqueda, paginación y eliminación lógica.
 - Préstamos y validación de fechas.

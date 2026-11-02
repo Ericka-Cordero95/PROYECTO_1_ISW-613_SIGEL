@@ -1,11 +1,22 @@
 <?php
 
-// Carga las funciones comunes y la sesion.
+//Carga las funciones comunes y la sesion.
 require_once __DIR__ . '/../includes/bootstrap.php';
 
 // Muestra el mensaje una vez.
 $mensaje = $_SESSION['error_login'] ?? '';
 unset($_SESSION['error_login']);
+
+//Solo muestra mensajes definidos por nosotros.
+$estado = $_GET['estado'] ?? '';
+
+if ($mensaje === '' && is_string($estado)) {
+    if ($estado === 'cerrada') {
+        $mensaje = 'Sesión cerrada correctamente.';
+    } elseif ($estado === 'expirada') {
+        $mensaje = 'La sesión terminó por inactividad. Ingrese nuevamente.';
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">

@@ -2,10 +2,8 @@
 
 require_once __DIR__ . '/../../includes/bootstrap.php';
 
-// Sin usuario autenticado, vuelve al login.
-if (!isset($_SESSION['usuario_id'])) {
-    redirigir('/index.php');
-}
+// Revisa la sesión antes de mostrar contenido.
+requerirSesion();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -25,5 +23,16 @@ if (!isset($_SESSION['usuario_id'])) {
         Rol:
         <?= escapar($_SESSION['usuario_rol']) ?>
     </p>
+
+    <form action="/actions/logout.php" method="post">
+        <!-- Protege el cierre de sesión. -->
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="<?= escapar(obtenerTokenCsrf()) ?>"
+        >
+
+        <button type="submit">Cerrar sesión</button>
+    </form>
 </body>
 </html>
