@@ -24,6 +24,12 @@ requerirSesion();
         <?= escapar($_SESSION['usuario_rol']) ?>
     </p>
 
+<?php if ($_SESSION['usuario_rol'] === 'administrador'): ?>
+    <p>
+        <a href="/pages/usuarios.php">Administrar usuarios</a>
+    </p>
+<?php endif; ?>
+
     <form action="/actions/logout.php" method="post">
         <!-- Protege el cierre de sesión. -->
         <input

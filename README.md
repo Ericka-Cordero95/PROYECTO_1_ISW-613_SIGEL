@@ -27,6 +27,8 @@ Se desarrolla con PHP y MySQL/MariaDB, sin frameworks ni librerías de terceros.
 - Cierre de sesión por POST con token CSRF.
 - Expiración después de 15 minutos sin actividad.
 - Revisión de la cuenta en cada petición protegida.
+- Control de acceso por rol en el servidor.
+- Entrada al módulo de usuarios reservada al administrador.
 
 ## Requisitos
 
@@ -246,9 +248,23 @@ Para probar la inactividad se usaron temporalmente 30 segundos.
 Después de la prueba, el límite se dejó en 900 segundos, equivalentes
 a 15 minutos.
 
+## Permisos por rol
+
+La función requerirRol() está en includes/auth.php.
+Primero revisa la sesión y después comprueba el rol del usuario.
+
+La página de usuarios permite entrar solo al administrador.
+El operador no puede acceder aunque escriba la URL directamente.
+
+El enlace de usuarios se muestra solo al administrador.
+Ocultar el enlace no reemplaza la revisión del servidor.
+
+Se probó el acceso como administrador, como operador y sin sesión.
+El CRUD de usuarios todavía está pendiente.
+
 ## Pendientes
 
-- Control de acceso por rol.
+- Aplicar los permisos en cada página y acción de los próximos módulos.
 - CRUD de usuarios, categorías y equipos.
 - Búsqueda, paginación y eliminación lógica.
 - Préstamos y validación de fechas.

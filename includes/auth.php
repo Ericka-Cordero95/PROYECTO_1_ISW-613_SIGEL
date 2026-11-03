@@ -60,11 +60,22 @@ function requerirSesion(): void
         redirigir('/index.php');
     }
 
-    //Actualiza los datos por si cambiaron en la base de datos.
+    // Actualiza los datos desde la base de datos.
     $_SESSION['usuario_nombre'] = $usuario['nombre'];
     $_SESSION['usuario_rol'] = $usuario['rol'];
     $_SESSION['ultima_actividad'] = $ahora;
 
-    //Evita guardar esta pagina en la cache del navegador.
+    // Evita guardar la página en caché.
     header('Cache-Control: no-store');
+}
+
+// Revisa la sesión y los roles permitidos.
+function requerirRol(array $rolesPermitidos): void
+{
+    requerirSesion();
+
+    if (!in_array($_SESSION['usuario_rol'], $rolesPermitidos, true)) {
+        http_response_code(403);
+        exit('No tiene permiso para ingresar.');
+    }
 }
