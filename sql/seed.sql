@@ -20,3 +20,12 @@ VALUES (
     'operador@sigel.local',
     '$2y$10$u7.RONHjW4GOaHmNg5ontOawVlIE0Bg4ltTz2TrDav/ieQDfyYDWi'
 );
+
+INSERT INTO categorias (nombre, dias_max_prestamo)
+VALUES
+    ('Computadoras', 3),
+    ('Proyectores', 2),
+    ('Microscopios', 1),
+    ('Instrumentos de medicion', 2),
+    ('Audio', 3),
+    ('Camaras', 2);

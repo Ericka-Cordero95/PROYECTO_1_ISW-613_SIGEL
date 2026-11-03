@@ -29,6 +29,10 @@ Se desarrolla con PHP y MySQL/MariaDB, sin frameworks ni librerías de terceros.
 - Revisión de la cuenta en cada petición protegida.
 - Control de acceso por rol en el servidor.
 - Entrada al módulo de usuarios reservada al administrador.
+- Tabla de categorías y datos de prueba.
+- Listado de categorías con búsqueda por nombre.
+- Paginación con cantidades de 5, 10, 20 y 50 registros.
+- Cookie para recordar la cantidad de registros por página.
 
 ## Requisitos
 
@@ -261,6 +265,25 @@ Ocultar el enlace no reemplaza la revisión del servidor.
 
 Se probó el acceso como administrador, como operador y sin sesión.
 El CRUD de usuarios todavía está pendiente.
+
+## Categorías
+
+El administrador puede consultar categorías y buscar por nombre.
+El listado muestra solo las categorías que no están eliminadas.
+
+La búsqueda y el cambio de página utilizan GET.
+Las consultas se realizan con PDO y parámetros preparados.
+
+Se puede elegir entre 5, 10, 20 y 50 registros por página.
+La cookie sigel_categorias_cantidad recuerda esa preferencia.
+
+El servidor revisa el valor de la cookie.
+Si no es válido, utiliza 10 registros por página.
+
+Se probó la búsqueda, la paginación y la preferencia guardada.
+También se comprobó que el operador no puede entrar al listado.
+
+Crear, editar y eliminar categorías todavía está pendiente.
 
 ## Pendientes
 

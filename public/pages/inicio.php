@@ -28,6 +28,10 @@ requerirSesion();
     <p>
         <a href="/pages/usuarios.php">Administrar usuarios</a>
     </p>
+
+    <p>
+        <a href="/pages/categorias.php">Administrar categorías</a>
+    </p>
 <?php endif; ?>
 
     <form action="/actions/logout.php" method="post">

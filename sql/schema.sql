@@ -30,3 +30,12 @@ CREATE TABLE usuarios (
         ON DELETE RESTRICT
         ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
+
+CREATE TABLE categorias (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    dias_max_prestamo INT UNSIGNED NOT NULL,
+    eliminado_en DATETIME NULL,
+
+    CONSTRAINT uq_categorias_nombre UNIQUE (nombre)
+) ENGINE=InnoDB;
