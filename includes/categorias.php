@@ -38,3 +38,20 @@ function listarCategorias(
 
     return $consulta->fetchAll();
 }
+//Busca una categoria que no este eliminada.
+function buscarCategoria(PDO $pdo, int $id): array|false
+{
+    // El ID se envía separado del texto SQL.
+    $consulta = $pdo->prepare(
+        'SELECT id, nombre, dias_max_prestamo
+         FROM categorias
+         WHERE id = :id
+           AND eliminado_en IS NULL
+         LIMIT 1'
+    );
+
+    $consulta->execute(['id' => $id]);
+
+    //Devuelve la categoria o false si no existe.
+    return $consulta->fetch();
+}

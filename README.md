@@ -33,6 +33,11 @@ Se desarrolla con PHP y MySQL/MariaDB, sin frameworks ni librerías de terceros.
 - Listado de categorías con búsqueda por nombre.
 - Paginación con cantidades de 5, 10, 20 y 50 registros.
 - Cookie para recordar la cantidad de registros por página.
+- Creación y edición de categorías mediante un formulario compartido.
+- Validación de nombre y días máximos de préstamo en el servidor.
+- Control de nombres duplicados mediante una restricción UNIQUE.
+- Eliminación lógica de categorías.
+- Protección de las acciones mediante rol, método POST y token CSRF.
 
 ## Requisitos
 
@@ -283,12 +288,58 @@ Si no es válido, utiliza 10 registros por página.
 Se probó la búsqueda, la paginación y la preferencia guardada.
 También se comprobó que el operador no puede entrar al listado.
 
-Crear, editar y eliminar categorías todavía está pendiente.
+El administrador puede crear, consultar, editar y eliminar categorías.
+
+La creación y la edición utilizan el mismo formulario:
+public/pages/categoria_form.php.
+
+Sin ID, el formulario permite crear una categoría.
+Con ID, carga una categoría existente para editarla.
+
+La acción public/actions/categoria_guardar.php valida los datos
+y ejecuta INSERT o UPDATE mediante consultas preparadas.
+
+El nombre es obligatorio y actualmente admite hasta 100 bytes.
+Los días máximos de préstamo deben estar entre 1 y 365.
+Este rango es una decisión inicial del proyecto.
+
+No se permiten nombres duplicados.
+Los nombres de las categorías eliminadas también siguen reservados.
+
+La acción public/actions/categoria_eliminar.php realiza una
+eliminación lógica: guarda la fecha en eliminado_en.
+El registro permanece en la base de datos y deja de aparecer
+en el listado.
+
+Las acciones de guardar y eliminar comprueban el rol de
+administrador, el método POST y el token CSRF.
+
+Se probó la creación, edición, validación de duplicados,
+cancelación de eliminación y eliminación lógica.
+También se comprobó la permanencia del registro en MySQL
+y la restricción de acceso para el operador.
+
+## Regla de negocio individual asignada
+
+Regla 25: dominio de correo permitido.
+
+Al crear o editar un usuario, el dominio de su correo debe
+pertenecer a la lista dominios_permitidos de la configuración.
+La lista se almacenará como dominios separados por comas.
+
+La comparación del dominio no distinguirá mayúsculas
+de minúsculas. El correo electrónico no podrá estar repetido.
+
+Los cambios en la lista deberán aplicarse sin modificar código.
+Si el correo no cumple, se rechazará la operación con un
+mensaje claro.
+
+Estado: pendiente de implementación en el módulo de usuarios.
 
 ## Pendientes
 
 - Aplicar los permisos en cada página y acción de los próximos módulos.
-- CRUD de usuarios, categorías y equipos.
+- CRUD de usuarios 
 - Búsqueda, paginación y eliminación lógica.
 - Préstamos y validación de fechas.
 - Transacciones y control de concurrencia.
