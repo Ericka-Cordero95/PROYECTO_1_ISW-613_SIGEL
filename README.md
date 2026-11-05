@@ -1,56 +1,48 @@
 # SIGEL — Sistema de Gestión de Préstamo de Equipos de Laboratorio
 
-Proyecto 1 de Programación en Ambiente Web I, ISW-613.
-
+Proyecto 1 de Programación en Ambiente Web I, ISW-613.  
+Universidad Técnica Nacional — Ingeniería del Software.  
 Estudiante: Ericka Cordero.
 
 ## Descripción
 
-Aplicación web para gestionar equipos y préstamos de un laboratorio universitario.
+Aplicación web para gestionar equipos y préstamos de un laboratorio universitario. Se desarrolla con PHP 8.x y MySQL/MariaDB, sin frameworks ni librerías de terceros en el código de la aplicación.
 
-El sistema tendrá dos roles: administrador y operador.
-Se desarrolla con PHP y MySQL/MariaDB, sin frameworks ni librerías de terceros.
+El sistema utiliza los roles `administrador` y `operador`.
+
+Actualmente están implementadas la autenticación, las sesiones, los permisos administrativos, el CRUD de categorías y la creación, consulta y edición de usuarios.
+
+Los módulos de equipos y préstamos siguen pendientes.
 
 ## Estado actual
 
-- Virtual host local funcionando.
-- Tablas de roles y usuarios creadas.
-- Roles y usuarios de prueba agregados.
-- Conexión PDO comprobada.
-- Configuración privada excluida de Git.
-- Registro de errores en un archivo privado.
-- Inicio de sesiones configurado.
-- Funciones de escape HTML y CSRF probadas.
-- Login con correo y contraseña.
-- Página de inicio que requiere sesión.
-- Bloqueo de cinco minutos después de tres intentos incorrectos.
-- Cierre de sesión por POST con token CSRF.
-- Expiración después de 15 minutos sin actividad.
-- Revisión de la cuenta en cada petición protegida.
-- Control de acceso por rol en el servidor.
-- Entrada al módulo de usuarios reservada al administrador.
-- Tabla de categorías y datos de prueba.
-- Listado de categorías con búsqueda por nombre.
-- Paginación con cantidades de 5, 10, 20 y 50 registros.
-- Cookie para recordar la cantidad de registros por página.
-- Creación y edición de categorías mediante un formulario compartido.
-- Validación de nombre y días máximos de préstamo en el servidor.
-- Control de nombres duplicados mediante una restricción UNIQUE.
-- Eliminación lógica de categorías.
-- Protección de las acciones mediante rol, método POST y token CSRF.
-- Listado administrativo de usuarios con nombre, correo, rol y estado.
-- Búsqueda de usuarios por nombre o correo.
-- Paginación del listado de usuarios.
+| Área | Implementación actual |
+|---|---|
+| Entorno | Virtual host con `public/` como único directorio publicado y conexión PDO |
+| Configuración | Credenciales privadas fuera de `public/` y excluidas de Git |
+| Autenticación | Login con correo y contraseña; bloqueo de cinco minutos después de tres fallos |
+| Sesiones | Regeneración del identificador al autenticar, logout por POST y expiración por 15 minutos de inactividad |
+| Autorización | Revisión de sesión y rol en páginas y acciones protegidas |
+| Seguridad común | Escape HTML, tokens CSRF y consultas preparadas |
+| Categorías | Crear, buscar, listar, editar y eliminar lógicamente |
+| Preferencias de categorías | Cantidades de 5, 10, 20 y 50 con cookie validada |
+| Usuarios | Crear, buscar, listar y editar; listado de 10 registros por página |
+| Regla 25 | Validación del dominio al crear y editar usuarios; correo único |
+| Bitácora | Creación, edición y eliminación de categorías; creación y edición de usuarios |
+| Errores | Registro técnico en un archivo privado |
+
+La eliminación lógica de usuarios y su selector de cantidad con cookie todavía no están implementados.
 
 ## Requisitos
 
 - XAMPP con Apache y PHP 8.x.
-- MySQL o MariaDB con motor InnoDB.
+- MySQL o MariaDB con motor InnoDB y soporte de columnas JSON.
 - Extensión PDO para MySQL habilitada.
 - Git.
 - Navegador web.
+- Permiso de escritura de PHP en `storage/logs/`.
 
-## Instalación local
+## Instalación y despliegue local
 
 ### 1. Clonar el repositorio
 
@@ -58,6 +50,7 @@ Ejecutar en la terminal:
 
 ```bash
 git clone https://github.com/Ericka-Cordero95/PROYECTO_1_ISW-613_SIGEL.git
+cd PROYECTO_1_ISW-613_SIGEL
 ```
 
 ### 2. Configurar el nombre local
@@ -68,7 +61,7 @@ Abrir el Bloc de notas como administrador y editar:
 C:\Windows\System32\drivers\etc\hosts
 ```
 
-Agregar esta línea y guardar el archivo sin extensión .txt:
+Agregar esta línea y guardar el archivo sin extensión `.txt`:
 
 ```text
 127.0.0.1 sigel.local
@@ -82,7 +75,9 @@ Editar:
 C:\xampp\apache\conf\extra\httpd-vhosts.conf
 ```
 
-Agregar el siguiente bloque. Cambiar RUTA_DEL_PROYECTO por la ruta completa de la carpeta clonada, usando barras /.
+Agregar el siguiente bloque.
+
+Sustituir `RUTA_DEL_PROYECTO` por la ruta absoluta de la carpeta clonada, usando barras `/`:
 
 ```apache
 <VirtualHost *:80>
@@ -98,7 +93,7 @@ Agregar el siguiente bloque. Cambiar RUTA_DEL_PROYECTO por la ruta completa de l
 </VirtualHost>
 ```
 
-En C:\xampp\apache\conf\httpd.conf, comprobar que esta línea no tenga # al inicio:
+En `C:\xampp\apache\conf\httpd.conf`, comprobar que esta línea no tenga `#` al inicio:
 
 ```apache
 Include conf/extra/httpd-vhosts.conf
@@ -106,311 +101,506 @@ Include conf/extra/httpd-vhosts.conf
 
 Reiniciar Apache desde XAMPP.
 
-### 4. Crear la base de datos y cargar los datos
+El `DocumentRoot` debe apuntar únicamente a `public/`, para que la configuración, los scripts SQL y los archivos privados no queden publicados.
+
+### 4. Crear la base de datos y cargar los datos iniciales
 
 Iniciar MySQL desde XAMPP y abrir:
 
+```text
 http://localhost/phpmyadmin
+```
 
-En una instalación nueva, importar los archivos en este orden:
+En una instalación nueva, importar en este orden:
 
-1. sql/schema.sql: crea la base de datos y las tablas.
-2. sql/seed.sql: agrega los roles y usuarios de prueba.
+1. `sql/schema.sql`: crea la base `sigel` y sus tablas.
+2. `sql/seed.sql`: agrega roles, cuentas de prueba, categorías y dominios permitidos iniciales.
 
-Los scripts actuales deben ejecutarse una vez en una instalación nueva.
-Repetirlos sobre las mismas tablas y datos puede generar errores.
+El esquema actualizado debe incluir estas tablas:
+
+- `roles`
+- `usuarios`
+- `categorias`
+- `configuracion`
+- `bitacora`
+
+La bitácora se llena con las operaciones realizadas en la aplicación.
+
+Los scripts se ejecutan una vez en una instalación nueva. No se deben reimportar sobre una base existente.
+
+Durante el desarrollo, las actualizaciones se aplican ejecutando únicamente los bloques nuevos necesarios.
 
 ### 5. Configurar la conexión
 
-Copiar config/config.example.php como config/config.local.php.
+Copiar:
 
-Completar la copia con los datos de MySQL del equipo:
-servidor, puerto, base de datos, usuario y contraseña.
+```text
+config/config.example.php
+```
 
-config.local.php no se sube a Git.
+como:
+
+```text
+config/config.local.php
+```
+
+Completar los campos existentes para:
+
+- Servidor.
+- Puerto.
+- Base de datos.
+- Usuario de MySQL.
+- Contraseña de MySQL.
+
+La base de datos debe ser `sigel`.
+
+El archivo `config.local.php` no se sube a Git.
 
 ### 6. Comprobar el acceso
 
 Con Apache y MySQL iniciados, abrir:
 
+```text
 http://sigel.local
+```
 
 Se muestra el formulario de inicio de sesión.
+
 Al entrar con una cuenta de prueba, se muestra su nombre y rol.
 
-## Credenciales de prueba
+## Credenciales de prueba por rol
 
-Estas cuentas son solo para pruebas locales.
+Estas cuentas son exclusivamente para pruebas locales.
+
+Las contraseñas indicadas deben corresponder a los hashes de `sql/seed.sql`.
 
 | Rol | Correo | Contraseña |
 |---|---|---|
 | Administrador | admin@sigel.local | AdminSigel2026! |
 | Operador | operador@sigel.local | OperadorSigel2026! |
 
-Las contraseñas se guardan como hashes en la base de datos.
+Las contraseñas se almacenan como hashes, nunca en texto plano.
 
-## Estructura del proyecto
+## Estructura y conexión entre archivos
 
-- config/: configuración y conexión PDO.
-- includes/: funciones comunes e inicio de la aplicación.
-- storage/: archivos privados.
-- storage/logs/: registro de errores.
-- sql/: estructura y datos iniciales.
-- public/: único directorio publicado por Apache.
-- public/pages/: páginas y formularios.
-- public/actions/: archivos que procesan las operaciones.
+| Ruta | Responsabilidad |
+|---|---|
+| `config/config.example.php` | Plantilla de configuración local |
+| `config/config.local.php` | Configuración privada de cada instalación; no versionada |
+| `config/database.php` | Define `obtenerConexion()` para acceder a MySQL mediante PDO |
+| `includes/bootstrap.php` | Carga configuración, sesión y funciones comunes antes de producir salida |
+| `includes/session.php` | Configura e inicia la sesión |
+| `includes/auth.php` | Define el cierre de sesión y las comprobaciones de sesión y rol |
+| `includes/helpers.php` | Funciones comunes como `escapar()` y `redirigir()` |
+| `includes/csrf.php` | Generación y validación de tokens CSRF |
+| `includes/categorias.php` | Consultas de categorías |
+| `includes/usuarios.php` | Consultas de usuarios y roles |
+| `includes/configuracion.php` | Lectura de configuración y validación de dominios |
+| `includes/bitacora.php` | Inserción de eventos de auditoría |
+| `public/index.php` | Formulario de login |
+| `public/pages/` | Páginas protegidas, listados y formularios |
+| `public/actions/` | Procesamiento de formularios y operaciones de escritura |
+| `storage/logs/php-error.log` | Errores técnicos; privado y excluido de Git |
+| `sql/schema.sql` | Estructura de la base de datos |
+| `sql/seed.sql` | Datos iniciales de prueba |
 
-Las carpetas para imágenes y recursos estáticos se completarán al desarrollar esos módulos.
+Las carpetas de imágenes y recursos se completarán al desarrollar equipos.
 
-## Sesiones
+### Flujo de una petición
 
-Las páginas y acciones cargan includes/bootstrap.php antes de mostrar contenido.
+1. La página carga `includes/bootstrap.php`.
+2. Comprueba la sesión y el permiso.
+3. Consulta los datos necesarios mediante PDO.
+4. Muestra el HTML escapando los datos.
+5. El formulario envía POST a una acción.
+6. La acción comprueba permiso, método, token CSRF y datos.
+7. Ejecuta la operación y registra la bitácora cuando corresponde.
+8. Redirige mediante GET al listado.
 
-La cookie sigel_session guarda el identificador de sesión.
-Los datos de la sesión se guardan en el servidor.
+Cargar un archivo de funciones no ejecuta automáticamente todas sus funciones.
 
-La cookie usa HttpOnly y SameSite=Lax.
-Secure se activa cuando el sitio utiliza HTTPS.
+## Sesiones y autenticación
+
+El login valida correo, contraseña y token CSRF en el servidor.
+
+La cuenta y su rol se consultan mediante una sentencia preparada. La contraseña se verifica con `password_verify()`.
+
+Las cuentas inactivas o eliminadas no pueden entrar.
+
+### Bloqueo por intentos incorrectos
+
+- Los primeros dos fallos muestran el mensaje de credenciales incorrectas.
+- El tercero bloquea la cuenta durante cinco minutos.
+- Intentar entrar durante el bloqueo no reinicia su duración.
+- Un acceso correcto limpia los fallos.
+
+### Sesión autenticada
+
+Al autenticar se ejecuta `session_regenerate_id(true)` y se renueva el token CSRF.
+
+En la sesión se guardan el identificador, el nombre, el rol y la última actividad.
+
+La cookie `sigel_session` contiene el identificador de sesión. Los datos de la sesión se guardan en el servidor.
+
+La cookie utiliza:
+
+- `HttpOnly`.
+- `SameSite=Lax`.
+- `Secure` cuando corresponde a HTTPS.
+
 El entorno local actual utiliza HTTP.
 
-Al entrar correctamente, se cambia el identificador de sesión.
-Se guardan el ID, el nombre, el rol y la última actividad.
+### Revisión de sesión
 
-La función requerirSesion() revisa que exista una sesión y que la cuenta
-siga activa y no esté eliminada. También actualiza el nombre y el rol
-desde la base de datos.
+`requerirSesion()` comprueba:
 
-Después de 15 minutos sin peticiones a páginas protegidas, la siguiente
-petición cierra la sesión y vuelve al login.
+- Que exista una sesión autenticada.
+- Que no haya vencido por inactividad.
+- Que la cuenta siga activa.
+- Que la cuenta no esté eliminada.
 
-El botón Cerrar sesión envía un formulario POST con token CSRF.
-Se borran los datos de la sesión, la cookie y la sesión del servidor.
+También actualiza el nombre y el rol desde MySQL.
 
-Las páginas protegidas envían Cache-Control: no-store para indicar
-al navegador que no debe guardarlas en caché.
+Después de 900 segundos sin peticiones protegidas, la siguiente petición cierra la sesión y vuelve al login.
 
-## Manejo de errores
+Para probar la inactividad se utilizaron temporalmente 30 segundos. Después se restauraron los 900 segundos, equivalentes a 15 minutos.
 
-El usuario recibe un mensaje general cuando ocurre un error interno.
+### Cierre de sesión
 
-Los detalles se guardan en storage/logs/php-error.log.
-Este archivo queda fuera de public/ y no se sube a Git.
+El cierre de sesión utiliza POST y token CSRF.
 
-PHP utiliza la zona horaria America/Costa_Rica.
+Destruye la sesión y elimina su cookie.
 
-## Escape HTML y CSRF
+Las páginas protegidas envían `Cache-Control: no-store`.
 
-La función escapar() permite mostrar datos como texto en HTML.
-Utiliza htmlspecialchars() con ENT_QUOTES, ENT_SUBSTITUTE y UTF-8.
-
-El token CSRF se crea con random_bytes() y se guarda en la sesión.
-El formulario de login lo envía en un campo oculto.
-La acción lo revisa con hash_equals() antes de procesar los datos.
-
-Después de entrar correctamente, se elimina el token anterior.
-El siguiente formulario generará uno nuevo.
-
-Se hicieron estas pruebas:
-
-- Mostrar una etiqueta script como texto.
-- Enviar el formulario con el token correcto.
-- Cambiar el token y comprobar que el servidor rechaza el envío.
-
-La página temporal se eliminó después de las pruebas.
-Los próximos formularios también deberán usar estas funciones.
-
-## Inicio de sesión
-
-El formulario envía el correo, la contraseña y el token CSRF.
-
-El servidor valida los datos y busca al usuario con una consulta preparada.
-La contraseña se revisa con password_verify().
-
-Las cuentas desactivadas o eliminadas no pueden entrar.
-
-Los primeros dos fallos muestran un mensaje para revisar los datos.
-El tercer fallo bloquea la cuenta durante cinco minutos y muestra el aviso de bloqueo.
-
-Intentar entrar durante el bloqueo no reinicia el tiempo.
-Cuando termina, se puede intentar nuevamente.
-
-Un acceso correcto limpia los fallos y permite entrar a la página de inicio.
-
-La página de inicio comprueba que exista un usuario en la sesión.
-El control de permisos por rol todavía está pendiente.
-
-## Pruebas del login
-
-Se comprobó lo siguiente:
-
-- Una cuenta sin bloqueo puede entrar con la contraseña correcta.
-- El primer y segundo fallo muestran el mensaje de datos incorrectos.
-- El tercer fallo muestra el mensaje de bloqueo.
-- Durante el bloqueo no se permite entrar, aunque la contraseña sea correcta.
-
-## Pruebas de sesión
-
-- Cerrar sesión vuelve al login y muestra un mensaje.
-- Abrir la página de inicio después de salir vuelve al login.
-- Abrir logout.php directamente por URL rechaza la petición.
-- La sesión termina por inactividad.
-- Desactivar una cuenta impide que siga usando una página protegida.
-
-Para probar la inactividad se usaron temporalmente 30 segundos.
-Después de la prueba, el límite se dejó en 900 segundos, equivalentes
-a 15 minutos.
+La sesión persistente «Recordarme» todavía está pendiente.
 
 ## Permisos por rol
 
-La función requerirRol() está en includes/auth.php.
-Primero revisa la sesión y después comprueba el rol del usuario.
+La función `requerirRol()` está en `includes/auth.php`.
 
-La página de usuarios permite entrar solo al administrador.
-El operador no puede acceder aunque escriba la URL directamente.
+Primero comprueba la sesión y después el rol permitido.
 
-El enlace de usuarios se muestra solo al administrador.
-Ocultar el enlace no reemplaza la revisión del servidor.
+Actualmente los módulos de categorías y usuarios están reservados al administrador, tanto en sus páginas como en sus acciones.
 
-Se probó el acceso como administrador, como operador y sin sesión.
-El CRUD de usuarios todavía está pendiente.
+Ocultar un enlace no sustituye la comprobación del servidor.
+
+Según el alcance del proyecto:
+
+- El administrador gestionará usuarios, categorías, equipos y consultará reportes.
+- El operador gestionará préstamos y consultará equipos.
+
+Las funciones de equipos, préstamos y reportes aún están pendientes.
+
+## Escape HTML, CSRF y errores
+
+### Escape HTML
+
+`escapar()` utiliza `htmlspecialchars()` con:
+
+- `ENT_QUOTES`.
+- `ENT_SUBSTITUTE`.
+- Codificación UTF-8.
+
+Permite mostrar los datos como texto en HTML.
+
+### Protección CSRF
+
+El token CSRF:
+
+- Se genera con `random_bytes()`.
+- Se conserva en la sesión.
+- Se envía en campos ocultos.
+- Se comprueba con `hash_equals()` antes de modificar datos.
+
+Los formularios de escritura utilizan POST y redirección posterior mediante GET.
+
+La validación del navegador complementa la validación definitiva del servidor.
+
+### Manejo de errores
+
+Los errores internos se presentan con mensajes generales.
+
+El detalle técnico se registra en:
+
+```text
+storage/logs/php-error.log
+```
+
+Este archivo está fuera de `public/` y excluido de Git.
+
+PHP utiliza la zona horaria `America/Costa_Rica`. Las fechas generadas por MySQL dependen de la configuración de su sesión.
+
+El registro de errores técnicos es distinto de la bitácora de operaciones.
 
 ## Categorías
 
-El administrador puede consultar categorías y buscar por nombre.
-El listado muestra solo las categorías que no están eliminadas.
+El administrador puede crear, consultar, editar y eliminar lógicamente categorías.
 
-La búsqueda y el cambio de página utilizan GET.
-Las consultas se realizan con PDO y parámetros preparados.
+| Archivo | Función |
+|---|---|
+| `includes/categorias.php` | Consultas del módulo |
+| `public/pages/categorias.php` | Listado, búsqueda y paginación |
+| `public/pages/categoria_form.php` | Formulario compartido de creación y edición |
+| `public/actions/categoria_guardar.php` | Validación y guardado |
+| `public/actions/categoria_eliminar.php` | Eliminación lógica |
 
-Se puede elegir entre 5, 10, 20 y 50 registros por página.
-La cookie sigel_categorias_cantidad recuerda esa preferencia.
+### Listado y preferencias
 
-El servidor revisa el valor de la cookie.
-Si no es válido, utiliza 10 registros por página.
+La búsqueda por nombre y la paginación utilizan GET.
 
-Se probó la búsqueda, la paginación y la preferencia guardada.
-También se comprobó que el operador no puede entrar al listado.
+Se permiten 5, 10, 20 y 50 registros por página.
 
-El administrador puede crear, consultar, editar y eliminar categorías.
+La cookie `sigel_categorias_cantidad` recuerda la preferencia durante 30 días.
 
-La creación y la edición utilizan el mismo formulario:
-public/pages/categoria_form.php.
+Su valor se valida contra la lista permitida. Un valor inesperado utiliza 10.
 
-Sin ID, el formulario permite crear una categoría.
-Con ID, carga una categoría existente para editarla.
+### Creación y edición
 
-La acción public/actions/categoria_guardar.php valida los datos
-y ejecuta INSERT o UPDATE mediante consultas preparadas.
+El formulario sin ID crea una categoría.
 
-El nombre es obligatorio y actualmente admite hasta 100 bytes.
-Los días máximos de préstamo deben estar entre 1 y 365.
-Este rango es una decisión inicial del proyecto.
+El formulario con ID carga una categoría existente para editarla.
 
-No se permiten nombres duplicados.
-Los nombres de las categorías eliminadas también siguen reservados.
+El nombre es obligatorio y admite hasta 100 bytes con la validación actual de `strlen()`.
 
-La acción public/actions/categoria_eliminar.php realiza una
-eliminación lógica: guarda la fecha en eliminado_en.
-El registro permanece en la base de datos y deja de aparecer
-en el listado.
+Los días máximos de préstamo deben estar entre 1 y 365. Este rango es una decisión inicial del proyecto.
 
-Las acciones de guardar y eliminar comprueban el rol de
-administrador, el método POST y el token CSRF.
+Todavía falta utilizar ese límite en préstamos.
 
-Se probó la creación, edición, validación de duplicados,
-cancelación de eliminación y eliminación lógica.
-También se comprobó la permanencia del registro en MySQL
-y la restricción de acceso para el operador.
+La restricción `uq_categorias_nombre` impide nombres duplicados y también reserva los nombres de categorías eliminadas.
 
-## Regla de negocio individual asignada
+### Eliminación lógica
 
-Regla 25: dominio de correo permitido.
+La eliminación establece una fecha en `eliminado_en`; no borra la fila.
 
-Al crear o editar un usuario, el dominio de su correo debe
-pertenecer a la lista dominios_permitidos de la configuración.
-La lista se almacenará como dominios separados por comas.
+Las consultas del listado excluyen las categorías eliminadas.
 
-La comparación del dominio no distinguirá mayúsculas
-de minúsculas. El correo electrónico no podrá estar repetido.
+### Seguridad y bitácora
 
-Los cambios en la lista deberán aplicarse sin modificar código.
-Si el correo no cumple, se rechazará la operación con un
-mensaje claro.
+Guardar y eliminar requieren:
 
-Estado: implementación parcial.
+- Rol administrador.
+- Método POST.
+- Token CSRF válido.
+- Validación de datos en el servidor.
 
-La tabla configuracion contiene la clave dominios_permitidos,
-con una lista de dominios separados por comas.
+La operación y su evento de bitácora se confirman dentro de una misma transacción.
 
-includes/configuracion.php consulta la lista y comprueba
-el dominio exacto del correo sin distinguir mayúsculas
-de minúsculas.
-
-Se probaron dominios permitidos, rechazados y en mayúsculas.
-También se comprobó que cambiar la configuración surte
-efecto sin modificar PHP.
-
-Falta integrar esta validación en la creación y edición
-de usuarios y comprobar el rechazo de correos duplicados.
+Las ediciones y eliminaciones leen la fila con `FOR UPDATE`.
 
 ## Usuarios
 
-El listado de usuarios está disponible solo para el administrador.
-El servidor comprueba el permiso mediante requerirRol().
+El módulo está reservado al administrador.
 
-La página public/pages/usuarios.php muestra los datos.
-El archivo includes/usuarios.php contiene las consultas preparadas.
+El listado relaciona `usuarios.rol_id` con `roles.id` y muestra:
 
-El listado relaciona usuarios con roles mediante usuarios.rol_id.
-Muestra únicamente usuarios que no están eliminados.
-Incluye tanto cuentas activas como inactivas.
+- ID.
+- Nombre.
+- Correo.
+- Rol.
+- Estado.
+- Enlace de edición.
 
-Permite buscar por nombre o correo y muestra 10 registros por página.
-Las consultas no recuperan ni muestran hashes de contraseñas.
+Incluye cuentas activas e inactivas, pero excluye las eliminadas.
 
-Se comprobó el listado, la búsqueda, la paginación y el rechazo
-del acceso con el rol operador.
+Permite buscar por nombre o correo y actualmente muestra 10 registros por página.
 
-La creación, edición y desactivación siguen pendientes.
-La regla 25 se implementará al crear y editar usuarios.
+El selector de cantidad y su cookie aún están pendientes.
+
+| Archivo | Función |
+|---|---|
+| `includes/usuarios.php` | Consultas de usuarios y roles |
+| `public/pages/usuarios.php` | Listado y enlaces Nuevo usuario y Editar |
+| `public/pages/usuario_form.php` | Formulario compartido de creación y edición |
+| `public/actions/usuario_guardar.php` | Validación, guardado y registro de bitácora |
+
+### Validaciones
+
+El nombre admite hasta 100 bytes y el correo hasta 150 bytes.
+
+El rol se comprueba en MySQL. Solo se permiten `administrador` y `operador`.
+
+El administrador no puede quitarse su propio rol administrativo.
+
+La edición actual conserva el estado activo de la cuenta.
+
+### Contraseñas
+
+La contraseña es obligatoria al crear.
+
+Al editar, dejarla vacía conserva la contraseña actual.
+
+Las contraseñas nuevas admiten entre 8 y 72 bytes, sin caracteres nulos. Este rango es una decisión inicial de validación.
+
+Se almacenan mediante `password_hash()`.
+
+### Regla individual y bitácora
+
+La creación y edición aplican la regla 25 y guardan su evento de bitácora en la misma transacción.
+
+No se recuperan hashes para el formulario ni se registran contraseñas o hashes en la bitácora.
+
+El evento indica si se estableció una contraseña nueva mediante `contrasena_actualizada`.
+
+La eliminación lógica de usuarios y una interfaz para cambiar su estado activo siguen pendientes.
+
+Desactivar una cuenta no sustituye la eliminación lógica exigida.
+
+## Regla de negocio individual 25: dominio de correo permitido
+
+La validación está integrada en la creación y edición de usuarios.
+
+La tabla `configuracion` tiene las columnas `clave` y `valor`.
+
+La lista está en el valor de la fila cuya clave es `dominios_permitidos`. No es una columna llamada `dominios_permitidos`.
+
+Valor inicial de prueba:
+
+```text
+sigel.local,utn.ac.cr
+```
+
+### Funcionamiento
+
+`includes/configuracion.php`:
+
+1. Consulta la lista en MySQL.
+2. Separa los dominios por comas.
+3. Elimina espacios externos.
+4. Convierte los dominios a minúsculas.
+5. Extrae el dominio del correo.
+6. Comprueba una coincidencia exacta.
+
+La comparación no distingue mayúsculas de minúsculas.
+
+Una lista vacía o ausente rechaza todos los dominios.
+
+Permitir `utn.ac.cr` no permite automáticamente sus subdominios ni dominios como `utn.ac.cr.otro.com`.
+
+### Correo único
+
+La restricción `uq_usuarios_correo` impide correos duplicados, incluso los de usuarios eliminados.
+
+La acción muestra un mensaje claro cuando el dominio no está permitido o el correo ya existe.
+
+Editar una cuenta sin cambiar su propio correo no constituye un duplicado.
+
+### Cambios de configuración
+
+Cambiar la lista desde MySQL afecta al siguiente envío sin modificar PHP.
+
+La regla se aplica al guardar usuarios, no al login.
+
+Retirar un dominio no elimina ni desactiva automáticamente las cuentas existentes.
+
+### Prueba de cambio de configuración
+
+1. Agregar temporalmente `ejemplo.com` al valor de `dominios_permitidos`, conservando los dominios anteriores.
+2. Crear una cuenta con un correo de ese dominio: debe aceptarse.
+3. Restaurar la lista original.
+4. Intentar editar esa cuenta conservando su correo: debe rechazarse sin guardar cambios.
+5. Intentar crear otra cuenta con ese dominio: debe rechazarse.
+
+Esta prueba forma parte de la validación final de la regla y debe completarse antes de darla por verificada en el formulario.
 
 ## Bitácora de operaciones
 
-La tabla bitacora registra las operaciones de creación,
-edición y eliminación lógica de categorías.
+`includes/bitacora.php` define `registrarBitacora()`.
 
-Cada evento contiene el usuario responsable, la acción,
-la entidad, el identificador afectado, los valores anteriores
-y posteriores en JSON, la dirección IP y la fecha.
+La tabla `bitacora` contiene:
 
-La función registrarBitacora() está en includes/bitacora.php.
-La aplicación solo inserta eventos; no ofrece operaciones
-para editarlos o eliminarlos.
+| Campo | Información |
+|---|---|
+| `usuario_id` | Usuario responsable |
+| `accion` | Operación realizada |
+| `entidad` | Tabla o módulo afectado |
+| `entidad_id` | Identificador del registro |
+| `valores_antes` | Datos anteriores en JSON |
+| `valores_despues` | Datos posteriores en JSON |
+| `ip` | Dirección de la solicitud |
+| `creado_en` | Fecha y hora |
 
-La escritura de la categoría y su evento se ejecutan en una
-misma transacción. Si falla alguna parte, se revierten los cambios.
+La aplicación solo inserta eventos. No ofrece acciones para modificarlos ni eliminarlos.
 
-Las ediciones y eliminaciones consultan la fila con FOR UPDATE
-dentro de la transacción.
+En una creación, los valores anteriores son `NULL`.
 
-La auditoría comienza desde esta integración.
-Las operaciones anteriores no cuentan con eventos históricos.
+La eliminación lógica conserva en los valores posteriores la fecha de eliminación.
 
-Se probaron la creación, edición y eliminación de una categoría,
-la cancelación de la eliminación y el rechazo de un nombre duplicado.
+### Operaciones integradas
 
-La integración de bitácora en usuarios, equipos y préstamos
-queda pendiente.
+- Crear categorías.
+- Editar categorías.
+- Eliminar lógicamente categorías.
+- Crear usuarios.
+- Editar usuarios.
+
+### Transacciones
+
+La operación y su evento usan la misma conexión PDO y transacción.
+
+Si falla alguna parte, se ejecuta `rollBack()`.
+
+Solo se confirma con `commit()` cuando ambas partes terminan correctamente.
+
+Las ediciones y eliminaciones bloquean la fila mediante `FOR UPDATE` durante la transacción.
+
+Los envíos rechazados por validación o duplicados no generan eventos de operación exitosa.
+
+### Alcance del historial
+
+La auditoría comienza desde su integración.
+
+No se reconstruyen eventos anteriores sin información fiable.
+
+Git y el README documentan los avances de programación. La bitácora documenta operaciones dentro de SIGEL.
+
+La integración en eliminación de usuarios, equipos y préstamos sigue pendiente.
+
+## Pruebas y validación
+
+### Evidencias registradas durante el desarrollo
+
+- Conexión PDO y funcionamiento del virtual host.
+- Login correcto, fallos de credenciales y bloqueo temporal.
+- Logout, acceso sin sesión y expiración por inactividad.
+- Restricción de acceso administrativo para el operador.
+- Escape de una etiqueta script como texto.
+- Rechazo de un token CSRF alterado.
+- CRUD de categorías, búsqueda, paginación y preferencia en cookie.
+- Validación de dominios permitidos, rechazados y en mayúsculas desde PHP.
+- Eventos CREAR, EDITAR y ELIMINAR de una misma categoría visibles en phpMyAdmin.
+
+### Comprobaciones que deben cerrarse en el avance actual
+
+- Crear y editar usuarios con dominio permitido y comprobar sus eventos.
+- Rechazar dominio no permitido tanto al crear como al editar.
+- Rechazar correo duplicado y conservar los datos recuperables del formulario.
+- Editar sin cambiar la contraseña y comprobar el acceso con la contraseña anterior.
+- Cambiar la contraseña y comprobar el acceso con la nueva.
+- Completar la prueba de cambio de dominios desde MySQL.
+- Confirmar que los JSON de usuarios no contienen contraseñas ni hashes.
+- Comprobar que operaciones rechazadas o canceladas no generan eventos exitosos.
+
+Esta lista distingue lo documentado previamente de las pruebas del último avance.
+
+No sustituye una revisión del código y ejecución completa antes de entregar.
 
 ## Pendientes
 
-- Aplicar los permisos en cada página y acción de los próximos módulos.
-- CRUD de usuarios 
-- Búsqueda, paginación y eliminación lógica.
-- Préstamos y validación de fechas.
-- Transacciones y control de concurrencia.
-- Imágenes de equipos.
-- Recordarme, preferencias y equipos recientes.
-- Reporte y exportación CSV.
-- Bitácora.
-- Regla de negocio individual asignada por el profesor.
+- Completar las pruebas de creación y edición de usuarios y de la regla 25.
+- Implementar eliminación lógica de usuarios con permiso, CSRF, transacción y bitácora.
+- Agregar selector de cantidad y cookie validada al listado de usuarios.
+- Implementar el CRUD de equipos con búsqueda, paginación, preferencia y eliminación lógica.
+- Implementar imágenes de equipos: tamaño máximo, extensiones permitidas, MIME con `finfo`, nombres generados por el servidor y almacenamiento privado.
+- Implementar préstamos con uno o varios equipos, fechas y estados: solicitado, aprobado, entregado, devuelto y cancelado.
+- Rechazar traslapes de préstamos activos para el mismo equipo y aplicar transacciones y control de concurrencia.
+- Integrar el límite de días de categorías en los préstamos según el diseño final.
+- Integrar bitácora en las operaciones pendientes de usuarios, equipos y préstamos.
+- Implementar «Recordarme» con selector/validador, hash del validador, expiración, rotación y revocación al cerrar sesión.
+- Implementar la cookie de hasta cinco equipos consultados recientemente.
+- Implementar reporte de equipos más prestados por rango de fechas y exportación CSV con `fputcsv()` y neutralización de fórmulas.
+- Aplicar y comprobar permisos en cada nueva página y acción.
+- Verificar la configuración PDO: excepciones y preparaciones emuladas desactivadas.
+- Probar una instalación desde cero con los scripts y credenciales documentados.
+- Revisar el historial incremental de Git y el requisito de commits en al menos 12 días distintos.
+- Preparar la defensa: flujo con ambos roles, recorrido de código, manipulación de cookies, CSRF y URL, y modificación en vivo.
