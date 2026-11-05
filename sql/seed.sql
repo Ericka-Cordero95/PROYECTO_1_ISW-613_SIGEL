@@ -29,3 +29,7 @@ VALUES
     ('Instrumentos de medicion', 2),
     ('Audio', 3),
     ('Camaras', 2);
+
+-- Define los dominios iniciales permitidos para los correos.
+INSERT INTO configuracion (clave, valor)
+VALUES ('dominios_permitidos', 'sigel.local,utn.ac.cr');

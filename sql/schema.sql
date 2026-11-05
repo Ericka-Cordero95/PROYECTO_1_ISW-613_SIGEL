@@ -39,3 +39,9 @@ CREATE TABLE categorias (
 
     CONSTRAINT uq_categorias_nombre UNIQUE (nombre)
 ) ENGINE=InnoDB;
+
+-- Guarda configuraciones que pueden cambiar sin modificar PHP.
+CREATE TABLE configuracion (
+    clave VARCHAR(100) NOT NULL PRIMARY KEY,
+    valor TEXT NOT NULL
+) ENGINE=InnoDB;

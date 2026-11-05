@@ -337,7 +337,21 @@ Los cambios en la lista deberán aplicarse sin modificar código.
 Si el correo no cumple, se rechazará la operación con un
 mensaje claro.
 
-Estado: pendiente de implementación en el módulo de usuarios.
+Estado: implementación parcial.
+
+La tabla configuracion contiene la clave dominios_permitidos,
+con una lista de dominios separados por comas.
+
+includes/configuracion.php consulta la lista y comprueba
+el dominio exacto del correo sin distinguir mayúsculas
+de minúsculas.
+
+Se probaron dominios permitidos, rechazados y en mayúsculas.
+También se comprobó que cambiar la configuración surte
+efecto sin modificar PHP.
+
+Falta integrar esta validación en la creación y edición
+de usuarios y comprobar el rechazo de correos duplicados.
 
 ## Usuarios
 
