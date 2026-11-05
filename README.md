@@ -38,6 +38,9 @@ Se desarrolla con PHP y MySQL/MariaDB, sin frameworks ni librerías de terceros.
 - Control de nombres duplicados mediante una restricción UNIQUE.
 - Eliminación lógica de categorías.
 - Protección de las acciones mediante rol, método POST y token CSRF.
+- Listado administrativo de usuarios con nombre, correo, rol y estado.
+- Búsqueda de usuarios por nombre o correo.
+- Paginación del listado de usuarios.
 
 ## Requisitos
 
@@ -335,6 +338,27 @@ Si el correo no cumple, se rechazará la operación con un
 mensaje claro.
 
 Estado: pendiente de implementación en el módulo de usuarios.
+
+## Usuarios
+
+El listado de usuarios está disponible solo para el administrador.
+El servidor comprueba el permiso mediante requerirRol().
+
+La página public/pages/usuarios.php muestra los datos.
+El archivo includes/usuarios.php contiene las consultas preparadas.
+
+El listado relaciona usuarios con roles mediante usuarios.rol_id.
+Muestra únicamente usuarios que no están eliminados.
+Incluye tanto cuentas activas como inactivas.
+
+Permite buscar por nombre o correo y muestra 10 registros por página.
+Las consultas no recuperan ni muestran hashes de contraseñas.
+
+Se comprobó el listado, la búsqueda, la paginación y el rechazo
+del acceso con el rol operador.
+
+La creación, edición y desactivación siguen pendientes.
+La regla 25 se implementará al crear y editar usuarios.
 
 ## Pendientes
 
