@@ -374,6 +374,34 @@ del acceso con el rol operador.
 La creación, edición y desactivación siguen pendientes.
 La regla 25 se implementará al crear y editar usuarios.
 
+## Bitácora de operaciones
+
+La tabla bitacora registra las operaciones de creación,
+edición y eliminación lógica de categorías.
+
+Cada evento contiene el usuario responsable, la acción,
+la entidad, el identificador afectado, los valores anteriores
+y posteriores en JSON, la dirección IP y la fecha.
+
+La función registrarBitacora() está en includes/bitacora.php.
+La aplicación solo inserta eventos; no ofrece operaciones
+para editarlos o eliminarlos.
+
+La escritura de la categoría y su evento se ejecutan en una
+misma transacción. Si falla alguna parte, se revierten los cambios.
+
+Las ediciones y eliminaciones consultan la fila con FOR UPDATE
+dentro de la transacción.
+
+La auditoría comienza desde esta integración.
+Las operaciones anteriores no cuentan con eventos históricos.
+
+Se probaron la creación, edición y eliminación de una categoría,
+la cancelación de la eliminación y el rechazo de un nombre duplicado.
+
+La integración de bitácora en usuarios, equipos y préstamos
+queda pendiente.
+
 ## Pendientes
 
 - Aplicar los permisos en cada página y acción de los próximos módulos.

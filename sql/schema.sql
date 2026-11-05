@@ -45,3 +45,47 @@ CREATE TABLE configuracion (
     clave VARCHAR(100) NOT NULL PRIMARY KEY,
     valor TEXT NOT NULL
 ) ENGINE=InnoDB;
+
+-- Guarda el historial de operaciones realizadas en el sistema.
+CREATE TABLE bitacora (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT UNSIGNED NOT NULL,
+    accion VARCHAR(30) NOT NULL,
+    entidad VARCHAR(50) NOT NULL,
+    entidad_id INT UNSIGNED NOT NULL,
+    valores_antes JSON NULL,
+    valores_despues JSON NULL,
+    ip VARCHAR(45) NULL,
+    creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_bitacora_entidad (entidad, entidad_id),
+    INDEX idx_bitacora_usuario_fecha (usuario_id, creado_en),
+
+    CONSTRAINT fk_bitacora_usuario
+        FOREIGN KEY (usuario_id)
+        REFERENCES usuarios (id)
+        ON DELETE RESTRICT
+        ON UPDATE RESTRICT
+) ENGINE=InnoDB;
+
+-- Guarda el historial de operaciones realizadas en el sistema.
+CREATE TABLE bitacora (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT UNSIGNED NOT NULL,
+    accion VARCHAR(30) NOT NULL,
+    entidad VARCHAR(50) NOT NULL,
+    entidad_id INT UNSIGNED NOT NULL,
+    valores_antes JSON NULL,
+    valores_despues JSON NULL,
+    ip VARCHAR(45) NULL,
+    creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_bitacora_entidad (entidad, entidad_id),
+    INDEX idx_bitacora_usuario_fecha (usuario_id, creado_en),
+
+    CONSTRAINT fk_bitacora_usuario
+        FOREIGN KEY (usuario_id)
+        REFERENCES usuarios (id)
+        ON DELETE RESTRICT
+        ON UPDATE RESTRICT
+) ENGINE=InnoDB;
