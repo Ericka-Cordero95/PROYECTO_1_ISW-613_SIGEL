@@ -594,8 +594,28 @@ Un valor inesperado utiliza 10.
 La tabla equipo_imagenes permite relacionar varias imágenes
 con un equipo. La carga y visualización siguen pendientes.
 
-La creación, edición, eliminación lógica, control de versión,
-imágenes y bitácora de equipos siguen pendientes.
+El administrador puede crear y editar equipos mediante
+public/pages/equipo_form.php.
+
+public/actions/equipo_guardar.php valida los campos, comprueba
+la categoría activa y guarda mediante consultas preparadas.
+
+El código es único, incluso para equipos eliminados.
+
+Las ediciones utilizan un campo version para detectar
+formularios desactualizados. Cada edición incrementa su valor.
+
+La operación y su evento de bitácora se confirman dentro
+de una misma transacción.
+
+El operador puede consultar el inventario, pero no puede
+abrir el formulario ni ejecutar la acción de guardado.
+
+Se probaron creación, edición, código duplicado, conflicto
+de versión, permisos y navegación entre varias páginas.
+
+La eliminación lógica y la carga y visualización de imágenes
+siguen pendientes.
 
 Se comprobó el listado, la búsqueda, la preferencia y el acceso
 con ambos roles. La navegación entre varias páginas se comprobará

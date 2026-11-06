@@ -63,3 +63,38 @@ function listarEquipos(
 
     return $consulta->fetchAll(PDO::FETCH_ASSOC);
 }
+
+// Busca un equipo que no este eliminado.
+function buscarEquipo(PDO $pdo, int $id): array|false
+{
+    // Recupera los campos necesarios para editar.
+    $consulta = $pdo->prepare(
+        'SELECT
+            id, categoria_id, codigo, nombre, marca, modelo,
+            numero_serie, estado, version, eliminado_en
+         FROM equipos
+         WHERE id = :id
+           AND eliminado_en IS NULL
+         LIMIT 1'
+    );
+
+    $consulta->execute(['id' => $id]);
+
+    return $consulta->fetch(PDO::FETCH_ASSOC);
+}
+
+// Obtiene las categorias que pueden asignarse a un equipo.
+function listarCategoriasParaEquipos(PDO $pdo): array
+{
+    // Excluye las categorias eliminadas.
+    $consulta = $pdo->prepare(
+        'SELECT id, nombre
+         FROM categorias
+         WHERE eliminado_en IS NULL
+         ORDER BY nombre, id'
+    );
+
+    $consulta->execute();
+
+    return $consulta->fetchAll(PDO::FETCH_ASSOC);
+}
