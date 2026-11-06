@@ -33,3 +33,67 @@ VALUES
 -- Define los dominios iniciales permitidos para los correos.
 INSERT INTO configuracion (clave, valor)
 VALUES ('dominios_permitidos', 'sigel.local,utn.ac.cr');
+
+-- Agrega equipos de prueba relacionados con categorias existentes.
+INSERT INTO equipos (
+    categoria_id,
+    codigo,
+    nombre,
+    marca,
+    modelo,
+    numero_serie,
+    estado
+)
+SELECT
+    id,
+    'EQ-001',
+    'Computadora portátil 1',
+    'Dell',
+    'Latitude',
+    'SERIE-001',
+    'disponible'
+FROM categorias
+WHERE nombre = 'Computadoras'
+  AND eliminado_en IS NULL;
+
+INSERT INTO equipos (
+    categoria_id,
+    codigo,
+    nombre,
+    marca,
+    modelo,
+    numero_serie,
+    estado
+)
+SELECT
+    id,
+    'EQ-002',
+    'Computadora portátil 2',
+    'HP',
+    'ProBook',
+    'SERIE-002',
+    'mantenimiento'
+FROM categorias
+WHERE nombre = 'Computadoras'
+  AND eliminado_en IS NULL;
+
+INSERT INTO equipos (
+    categoria_id,
+    codigo,
+    nombre,
+    marca,
+    modelo,
+    numero_serie,
+    estado
+)
+SELECT
+    id,
+    'EQ-003',
+    'Proyector de laboratorio',
+    'Epson',
+    'PowerLite',
+    'SERIE-003',
+    'disponible'
+FROM categorias
+WHERE nombre = 'Proyectores'
+  AND eliminado_en IS NULL;

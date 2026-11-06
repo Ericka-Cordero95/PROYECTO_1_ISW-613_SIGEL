@@ -34,6 +34,11 @@ requerirSesion();
     </p>
 <?php endif; ?>
 
+<!-- Abre el inventario que pueden consultar ambos roles. -->
+<p>
+    <a href="/pages/equipos.php">Consultar equipos</a>
+</p>
+
     <form action="/actions/logout.php" method="post">
         <!-- Protege el cierre de sesión. -->
         <input

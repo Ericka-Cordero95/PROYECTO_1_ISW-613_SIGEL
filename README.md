@@ -30,6 +30,8 @@ Los módulos de equipos y préstamos siguen pendientes.
 | Regla 25 | Validación del dominio al crear y editar usuarios; correo único |
 | Bitácora | Creación, edición y eliminación de categorías; creación y edición de usuarios |
 | Errores | Registro técnico en un archivo privado |
+| Equipos | Tablas, datos iniciales, listado y búsqueda por código o nombre |
+| Preferencias de equipos | Cantidades de 5, 10, 20 y 50 con cookie validada |
 
 La eliminación lógica de usuarios y su selector de cantidad con cookie todavía no están implementados.
 
@@ -569,6 +571,35 @@ La integración en eliminación de usuarios, equipos y préstamos sigue pendient
 - CRUD de categorías, búsqueda, paginación y preferencia en cookie.
 - Validación de dominios permitidos, rechazados y en mayúsculas desde PHP.
 - Eventos CREAR, EDITAR y ELIMINAR de una misma categoría visibles en phpMyAdmin.
+
+## Equipos
+
+El administrador y el operador pueden consultar el inventario.
+El permiso se comprueba en el servidor.
+
+La tabla equipos se relaciona con categorias mediante categoria_id.
+El código de inventario tiene una restricción UNIQUE.
+
+Los estados definidos son disponible, mantenimiento y baja.
+La disponibilidad para una ventana de préstamo se calculará
+con las fechas y estados de los préstamos.
+
+El listado permite buscar por código o nombre.
+Utiliza consultas preparadas, LIMIT y OFFSET.
+
+La cookie sigel_equipos_cantidad conserva durante 30 días
+la cantidad elegida: 5, 10, 20 o 50.
+Un valor inesperado utiliza 10.
+
+La tabla equipo_imagenes permite relacionar varias imágenes
+con un equipo. La carga y visualización siguen pendientes.
+
+La creación, edición, eliminación lógica, control de versión,
+imágenes y bitácora de equipos siguen pendientes.
+
+Se comprobó el listado, la búsqueda, la preferencia y el acceso
+con ambos roles. La navegación entre varias páginas se comprobará
+cuando existan suficientes equipos.
 
 ### Comprobaciones que deben cerrarse en el avance actual
 
