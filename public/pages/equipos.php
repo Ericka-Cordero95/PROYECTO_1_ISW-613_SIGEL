@@ -245,10 +245,34 @@ $esAdministrador = $_SESSION['usuario_rol'] === 'administrador';
                     <!-- Muestra las acciones solamente al administrador. -->
                     <?php if ($esAdministrador): ?>
                         <td>
-                            <!-- Envia el ID de esta fila al formulario. -->
+                            <!-- Envia el ID de esta fila al formulario de edicion. -->
                             <a href="/pages/equipo_form.php?id=<?= (int) $equipo['id'] ?>">
                                 Editar
                             </a>
+
+                            <!-- Pide confirmacion y envia la eliminacion por POST. -->
+                            <form
+                                action="/actions/equipo_eliminar.php"
+                                method="post"
+                                onsubmit="return confirm('¿Desea eliminar este equipo?');"
+                            >
+                                <!-- Envia el token que se comprueba en el servidor. -->
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="<?= escapar(obtenerTokenCsrf()) ?>"
+                                >
+
+                                <!-- Identifica el equipo de esta fila. -->
+                                <input
+                                    type="hidden"
+                                    name="id"
+                                    value="<?= (int) $equipo['id'] ?>"
+                                >
+
+                                <!-- Envia la solicitud de eliminacion logica. -->
+                                <button type="submit">Eliminar</button>
+                            </form>
                         </td>
                     <?php endif; ?>
                 </tr>
