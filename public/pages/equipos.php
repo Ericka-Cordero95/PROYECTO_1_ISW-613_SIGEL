@@ -223,8 +223,12 @@ $esAdministrador = $_SESSION['usuario_rol'] === 'administrador';
                     <!-- Escapa el codigo antes de mostrarlo en HTML. -->
                     <td><?= escapar($equipo['codigo']) ?></td>
 
-                    <!-- Muestra el nombre como texto seguro. -->
-                    <td><?= escapar($equipo['nombre']) ?></td>
+                    <!-- Abre el detalle del equipo para ambos roles. -->
+                    <td>
+                        <a href="/pages/equipo_detalle.php?id=<?= (int) $equipo['id'] ?>">
+                            <?= escapar($equipo['nombre']) ?>
+                        </a>
+                    </td>
 
                     <!-- Muestra el nombre de la categoria relacionada. -->
                     <td><?= escapar($equipo['categoria']) ?></td>
