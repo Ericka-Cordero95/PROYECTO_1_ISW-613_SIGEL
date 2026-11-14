@@ -34,6 +34,12 @@ requerirSesion();
     </p>
 <?php endif; ?>
 
+<!-- Muestra el registro de prestamos al operador. -->
+<?php if ($_SESSION['usuario_rol'] === 'operador'): ?>
+    <!-- Abre el listado de prestamos del operador. -->
+<p><a href="/pages/prestamos.php">Préstamos</a></p>
+<?php endif; ?>
+
 <!-- Abre el inventario que pueden consultar ambos roles. -->
 <p>
     <a href="/pages/equipos.php">Consultar equipos</a>

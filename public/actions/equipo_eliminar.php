@@ -53,6 +53,27 @@ try {
         redirigir('/pages/equipos.php');
     }
 
+    // Comprueba si el equipo tiene un prestamo activo.
+$prestamoActivo = $pdo->prepare(
+    "SELECT p.id
+     FROM prestamo_detalle d
+     INNER JOIN prestamos p ON p.id = d.prestamo_id
+     WHERE d.equipo_id = :id
+       AND p.estado IN ('solicitado', 'aprobado', 'entregado')
+     LIMIT 1
+     FOR UPDATE"
+);
+$prestamoActivo->execute(['id' => $id]);
+$tienePrestamoActivo = $prestamoActivo->fetchColumn() !== false;
+$prestamoActivo->closeCursor();
+
+if ($tienePrestamoActivo) {
+    $pdo->rollBack();
+    $_SESSION['equipo_mensaje'] =
+        'No se puede eliminar el equipo mientras tenga un préstamo activo.';
+    redirigir('/pages/equipos.php');
+}
+
     // Marca la eliminacion e incrementa la version.
     $actualizar = $pdo->prepare(
         'UPDATE equipos

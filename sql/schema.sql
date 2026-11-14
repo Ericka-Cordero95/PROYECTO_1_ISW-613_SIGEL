@@ -130,3 +130,35 @@ CREATE TABLE equipo_imagenes (
         ON DELETE RESTRICT
         ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
+
+-- Guarda a quien se presta, quien registra y las fechas del prestamo.
+CREATE TABLE prestamos (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT UNSIGNED NOT NULL,
+    operador_id INT UNSIGNED NOT NULL,
+    estado ENUM('solicitado', 'aprobado', 'entregado', 'devuelto', 'cancelado')
+        NOT NULL DEFAULT 'solicitado',
+    fecha_inicio DATETIME NOT NULL,
+    fecha_fin DATETIME NOT NULL,
+
+    CONSTRAINT chk_prestamos_fechas CHECK (fecha_fin > fecha_inicio),
+    CONSTRAINT fk_prestamos_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios (id),
+    CONSTRAINT fk_prestamos_operador
+        FOREIGN KEY (operador_id) REFERENCES usuarios (id)
+) ENGINE=InnoDB;
+
+-- Relaciona varios equipos con un mismo prestamo.
+CREATE TABLE prestamo_detalle (
+    prestamo_id INT UNSIGNED NOT NULL,
+    equipo_id INT UNSIGNED NOT NULL,
+    fecha_devolucion DATETIME NULL,
+
+    PRIMARY KEY (prestamo_id, equipo_id),
+    INDEX idx_prestamo_detalle_equipo (equipo_id, prestamo_id),
+
+    CONSTRAINT fk_prestamo_detalle_prestamo
+        FOREIGN KEY (prestamo_id) REFERENCES prestamos (id),
+    CONSTRAINT fk_prestamo_detalle_equipo
+        FOREIGN KEY (equipo_id) REFERENCES equipos (id)
+) ENGINE=InnoDB;
