@@ -98,6 +98,10 @@ try {
 
     $consulta->execute(['id' => $id]);
 
+    // Revoca los recordatorios de la cuenta eliminada.
+    $consulta = $pdo->prepare('DELETE FROM auth_tokens WHERE usuario_id = :id');
+    $consulta->execute(['id' => $id]);
+
     // Recupera los valores que realmente quedaron guardados.
     $consulta = $pdo->prepare(
         'SELECT

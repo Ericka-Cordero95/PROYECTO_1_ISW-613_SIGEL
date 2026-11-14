@@ -32,6 +32,11 @@ requerirSesion();
     <p>
         <a href="/pages/categorias.php">Administrar categorías</a>
     </p>
+
+    <!-- Abre el reporte reservado al administrador. -->
+    <p>
+        <a href="/pages/reporte_equipos.php">Equipos más prestados</a>
+    </p>
 <?php endif; ?>
 
 <!-- Muestra el registro de prestamos al operador. -->

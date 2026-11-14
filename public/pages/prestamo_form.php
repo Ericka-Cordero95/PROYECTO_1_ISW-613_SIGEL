@@ -27,7 +27,13 @@ $equipos = $pdo->query(
 
 // Muestra el resultado del ultimo envio una sola vez.
 $mensaje = $_SESSION['prestamo_mensaje'] ?? '';
-unset($_SESSION['prestamo_mensaje']);
+$datos = $_SESSION['prestamo_datos'] ?? [
+    'usuario_id' => '',
+    'fecha_inicio' => '',
+    'fecha_fin' => '',
+    'equipos' => [],
+];
+unset($_SESSION['prestamo_mensaje'], $_SESSION['prestamo_datos']);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -39,6 +45,7 @@ unset($_SESSION['prestamo_mensaje']);
 <body>
     <h1>Nuevo préstamo</h1>
     <p><a href="/pages/inicio.php">Volver al inicio</a></p>
+    <p><a href="/pages/prestamos.php">Ver préstamos</a></p>
 
     <!-- Muestra si la solicitud se guardo o fue rechazada. -->
     <?php if ($mensaje !== ''): ?>
@@ -61,7 +68,10 @@ unset($_SESSION['prestamo_mensaje']);
                 <select id="usuario_id" name="usuario_id" required>
                     <option value="">Seleccione una persona</option>
                     <?php foreach ($usuarios as $usuario): ?>
-                        <option value="<?= (int) $usuario['id'] ?>">
+                        <option
+                            value="<?= (int) $usuario['id'] ?>"
+                            <?= (string) $usuario['id'] === $datos['usuario_id'] ? 'selected' : '' ?>
+                        >
                             <?= escapar($usuario['nombre']) ?>
                             (<?= escapar($usuario['correo']) ?>)
                         </option>
@@ -78,6 +88,7 @@ unset($_SESSION['prestamo_mensaje']);
                             type="checkbox"
                             name="equipos[]"
                             value="<?= (int) $equipo['id'] ?>"
+                            <?= in_array((int) $equipo['id'], $datos['equipos'], true) ? 'checked' : '' ?>
                         >
                         <?= escapar($equipo['codigo']) ?> —
                         <?= escapar($equipo['nombre']) ?>
@@ -90,11 +101,15 @@ unset($_SESSION['prestamo_mensaje']);
             <!-- Captura el inicio y el fin previsto. -->
             <p>
                 <label for="fecha_inicio">Inicio</label>
-                <input type="datetime-local" id="fecha_inicio" name="fecha_inicio" required>
+                <input type="datetime-local" id="fecha_inicio" name="fecha_inicio"
+                    min="1000-01-01T00:00" max="9999-12-31T23:59"
+                    value="<?= escapar($datos['fecha_inicio']) ?>" required>
             </p>
             <p>
                 <label for="fecha_fin">Fin previsto</label>
-                <input type="datetime-local" id="fecha_fin" name="fecha_fin" required>
+                <input type="datetime-local" id="fecha_fin" name="fecha_fin"
+                    min="1000-01-01T00:00" max="9999-12-31T23:59"
+                    value="<?= escapar($datos['fecha_fin']) ?>" required>
             </p>
 
             <button type="submit">Registrar solicitud</button>

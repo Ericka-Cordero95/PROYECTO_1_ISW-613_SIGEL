@@ -30,7 +30,7 @@ if (
 
 // Comprueba el formato y que la fecha exista.
 $fechaValida = static function (string $valor): bool {
-    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $valor)) {
+    if (!preg_match('/\A\d{4}-\d{2}-\d{2}\z/', $valor)) {
         return false;
     }
 
@@ -102,7 +102,7 @@ if ($descargar === 'csv' && $error === '') {
     // Protege textos que una hoja de calculo podria interpretar.
     $textoCsv = static function (string $valor): string {
         if (
-            preg_match('/^[\s\x{FEFF}]*[=+\-@]/u', $valor)
+            preg_match('/^[\s\p{Z}\x{FEFF}]*[=+\-@＝＋－＠]/u', $valor)
             || preg_match('/^[\t\r\n]/', $valor)
         ) {
             return "'" . $valor;

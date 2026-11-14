@@ -232,6 +232,12 @@ try {
                 'hash' => $hash,
                 'id' => $id,
             ]);
+
+            // Revoca los recordatorios anteriores al cambio de clave.
+            $consulta = $pdo->prepare(
+                'DELETE FROM auth_tokens WHERE usuario_id = :id'
+            );
+            $consulta->execute(['id' => $id]);
         }
 
         $accion = 'EDITAR';

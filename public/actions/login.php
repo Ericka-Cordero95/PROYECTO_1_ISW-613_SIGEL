@@ -1,28 +1,23 @@
 <?php
 
+// Carga las funciones comunes antes de procesar el formulario.
 require_once __DIR__ . '/../../includes/bootstrap.php';
 
-//Esta accion solo acepta formularios enviados por POST.
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Allow: POST');
     http_response_code(405);
     exit('Método no permitido.');
 }
 
-//Revisa el token antes de procesar el formulario.
 validarTokenCsrf();
 
 $correo = $_POST['correo'] ?? null;
 $password = $_POST['password'] ?? null;
 $recordar = $_POST['recordar'] ?? '0';
-
-// Mensaje para datos incorrectos.
 $mensajeError = 'No se pudo iniciar sesión. Revise el correo y la contraseña.';
-
-// Mensaje cuando la cuenta esta bloqueada.
 $mensajeBloqueo = 'Alcanzó 3 intentos incorrectos. Espere a que termine el bloqueo de 5 minutos.';
 
-//Comprueba que se recibieron textos.
+// Comprueba los tipos antes de validar o utilizar los campos.
 if (
     !is_string($correo)
     || !is_string($password)
@@ -33,10 +28,8 @@ if (
     redirigir('/index.php');
 }
 
-//Quita espacios del correo, pero no de la clave.
 $correo = trim($correo);
 
-// Valida los datos tambien en el servidor.
 if (
     strlen($correo) > 150
     || filter_var($correo, FILTER_VALIDATE_EMAIL) === false
@@ -49,114 +42,88 @@ if (
 
 $pdo = obtenerConexion();
 
-//Busca la cuenta y su rol sin incluir usuarios eliminados.
-$consulta = $pdo->prepare(
-    'SELECT
-        u.id,
-        u.nombre,
-        u.password_hash,
-        u.activo,
-        r.nombre AS rol,
-        (
-            u.bloqueado_hasta IS NOT NULL
-            AND u.bloqueado_hasta > CURRENT_TIMESTAMP
-        ) AS bloqueado
-     FROM usuarios u
-     INNER JOIN roles r ON r.id = u.rol_id
-     WHERE u.correo = :correo
-       AND u.eliminado_en IS NULL
-     LIMIT 1'
-);
-
-$consulta->execute(['correo' => $correo]);
-$usuario = $consulta->fetch();
-
-//Rechaza cuentas inexistentes o desactivadas.
-if (
-    $usuario === false
-    || (int) $usuario['activo'] !== 1
-) {
-    $_SESSION['error_login'] = $mensajeError;
-    redirigir('/index.php');
-}
-
-// Si el bloqueo sigue activo no permite intentar entrar.
-if ((int) $usuario['bloqueado'] === 1) {
-    $_SESSION['error_login'] = $mensajeBloqueo;
-    redirigir('/index.php');
-}
-
-
-//Comprueba si la clave es incorrecta.
-if (!password_verify($password, $usuario['password_hash'])) {
-
-    //Limpia los fallos si ya termino un bloqueo anterior.
+try {
+    // Serializa los intentos aunque lleguen desde navegadores distintos.
+    $pdo->beginTransaction();
     $consulta = $pdo->prepare(
-        'UPDATE usuarios
-         SET intentos_fallidos = 0,
-             bloqueado_hasta = NULL
-         WHERE id = :id
-           AND bloqueado_hasta <= CURRENT_TIMESTAMP'
+        'SELECT u.id, u.nombre, u.password_hash, u.activo,
+                u.intentos_fallidos, r.nombre AS rol,
+                (u.bloqueado_hasta IS NOT NULL
+                    AND u.bloqueado_hasta > CURRENT_TIMESTAMP) AS bloqueado,
+                (u.bloqueado_hasta IS NOT NULL
+                    AND u.bloqueado_hasta <= CURRENT_TIMESTAMP) AS bloqueo_vencido
+         FROM usuarios u
+         INNER JOIN roles r ON r.id = u.rol_id
+         WHERE u.correo = :correo AND u.eliminado_en IS NULL
+         LIMIT 1
+         FOR UPDATE'
     );
+    $consulta->execute(['correo' => $correo]);
+    $usuario = $consulta->fetch(PDO::FETCH_ASSOC);
+    $consulta->closeCursor();
 
-    $consulta->execute(['id' => $usuario['id']]);
-
-    //Suma un fallo y bloquea al tercer intento incorrecto.
-    $consulta = $pdo->prepare(
-        'UPDATE usuarios
-         SET bloqueado_hasta = CASE
-                 WHEN intentos_fallidos >= 2
-                 THEN DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 5 MINUTE)
-                 ELSE bloqueado_hasta
-             END,
-             intentos_fallidos = intentos_fallidos + 1
-         WHERE id = :id'
-    );
-
-    $consulta->execute(['id' => $usuario['id']]);
-
-    //Revisa si este intento dejo la cuenta bloqueada.
-    $consulta = $pdo->prepare(
-        'SELECT
-            (
-                bloqueado_hasta IS NOT NULL
-                AND bloqueado_hasta > CURRENT_TIMESTAMP
-            ) AS bloqueado
-         FROM usuarios
-         WHERE id = :id'
-    );
-
-    $consulta->execute(['id' => $usuario['id']]);
-    $estado = $consulta->fetch();
-
-    if ($estado !== false && (int) $estado['bloqueado'] === 1) {
-        $_SESSION['error_login'] = $mensajeBloqueo;
-    } else {
+    if ($usuario === false || (int) $usuario['activo'] !== 1) {
+        $pdo->commit();
         $_SESSION['error_login'] = $mensajeError;
+        redirigir('/index.php');
     }
 
+    // Los intentos durante un bloqueo no cambian su vencimiento.
+    if ((int) $usuario['bloqueado'] === 1) {
+        $pdo->commit();
+        $_SESSION['error_login'] = $mensajeBloqueo;
+        redirigir('/index.php');
+    }
+
+    if (!password_verify($password, $usuario['password_hash'])) {
+        $fallos = (int) $usuario['bloqueo_vencido'] === 1
+            ? 1
+            : min(3, (int) $usuario['intentos_fallidos'] + 1);
+
+        $consulta = $pdo->prepare(
+            'UPDATE usuarios
+             SET intentos_fallidos = :fallos,
+                 bloqueado_hasta = CASE WHEN :bloquear = 1
+                     THEN DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 5 MINUTE)
+                     ELSE NULL END
+             WHERE id = :id'
+        );
+        $consulta->execute([
+            'fallos' => $fallos,
+            'bloquear' => $fallos >= 3 ? 1 : 0,
+            'id' => $usuario['id'],
+        ]);
+        $pdo->commit();
+
+        $_SESSION['error_login'] = $fallos >= 3 ? $mensajeBloqueo : $mensajeError;
+        redirigir('/index.php');
+    }
+
+    // Limpia los intentos despues de comprobar la clave.
+    $consulta = $pdo->prepare(
+        'UPDATE usuarios SET intentos_fallidos = 0, bloqueado_hasta = NULL
+         WHERE id = :id'
+    );
+    $consulta->execute(['id' => $usuario['id']]);
+    $pdo->commit();
+} catch (Throwable $error) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+
+    error_log((string) $error);
+    $_SESSION['error_login'] = 'No se pudo iniciar sesión. Intente nuevamente.';
     redirigir('/index.php');
 }
-//Un acceso correcto limpia los fallos anteriores.
-$consulta = $pdo->prepare(
-    'UPDATE usuarios
-     SET intentos_fallidos = 0,
-         bloqueado_hasta = NULL
-     WHERE id = :id'
-);
 
-$consulta->execute(['id' => $usuario['id']]);
-
-//Revoca el recordatorio anterior de este navegador.
+// Sustituye el recordatorio anterior de este navegador.
 revocarRecordatorio($pdo);
-
-//Solo crea una cookie persistente cuando se marca la casilla.
 $selector = null;
 
 if ($recordar === '1') {
     $selector = crearRecordatorio($pdo, (int) $usuario['id']);
 }
 
-//Renueva la sesion y descarta el token CSRF anterior.
+// Crea la sesion autenticada con un nuevo identificador y token CSRF.
 iniciarSesionUsuario($usuario, $selector);
 redirigir('/pages/inicio.php');

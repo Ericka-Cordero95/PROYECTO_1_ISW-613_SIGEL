@@ -28,5 +28,8 @@ function obtenerConexion(): PDO
         ]
     );
 
+    // Usa la misma hora local que los formularios y la bitacora.
+    $pdo->exec("SET time_zone = '-06:00'");
+
     return $pdo;
 }

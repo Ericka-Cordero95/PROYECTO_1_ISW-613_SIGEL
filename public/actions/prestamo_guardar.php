@@ -34,7 +34,11 @@ function leerFechaPrestamo(mixed $valor): ?DateTimeImmutable
         new DateTimeZone('America/Costa_Rica')
     );
 
-    if ($fecha === false || $fecha->format('Y-m-d\TH:i') !== $valor) {
+    if (
+        $fecha === false
+        || $fecha->format('Y-m-d\TH:i') !== $valor
+        || (int) $fecha->format('Y') < 1000
+    ) {
         return null;
     }
 
@@ -48,6 +52,26 @@ $usuarioId = filter_input(INPUT_POST, 'usuario_id', FILTER_VALIDATE_INT, [
 $inicio = leerFechaPrestamo($_POST['fecha_inicio'] ?? null);
 $fin = leerFechaPrestamo($_POST['fecha_fin'] ?? null);
 $seleccion = $_POST['equipos'] ?? [];
+
+// Conserva solamente campos simples para recuperar el formulario.
+$_SESSION['prestamo_datos'] = [
+    'usuario_id' => $usuarioId ? (string) $usuarioId : '',
+    'fecha_inicio' => $inicio === null ? '' : $inicio->format('Y-m-d\TH:i'),
+    'fecha_fin' => $fin === null ? '' : $fin->format('Y-m-d\TH:i'),
+    'equipos' => [],
+];
+
+if (is_array($seleccion)) {
+    foreach ($seleccion as $valor) {
+        $idValido = is_string($valor)
+            ? filter_var($valor, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]])
+            : false;
+
+        if ($idValido !== false) {
+            $_SESSION['prestamo_datos']['equipos'][] = $idValido;
+        }
+    }
+}
 
 // Comprueba la persona, las fechas y la seleccion.
 if (!$usuarioId) {
@@ -211,6 +235,9 @@ try {
     error_log((string) $error);
     volverAlFormularioPrestamo('No se pudo registrar el préstamo. Intente nuevamente.');
 }
+
+// Borra el formulario temporal solamente despues de confirmar.
+unset($_SESSION['prestamo_datos']);
 
 // Confirma el registro y vuelve por GET.
 volverAlFormularioPrestamo('Solicitud de préstamo #' . $prestamoId . ' registrada.');
