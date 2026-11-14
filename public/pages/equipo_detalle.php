@@ -24,6 +24,13 @@ if ($equipo === false) {
     exit('El equipo no existe.');
 }
 
+// Guarda la visita solo cuando el operador abre un equipo existente.
+require_once __DIR__ . '/../../includes/equipos_recientes.php';
+
+if ($_SESSION['usuario_rol'] === 'operador') {
+    registrarEquipoReciente((int) $_SESSION['usuario_id'], (int) $equipo['id']);
+}
+
 // Busca las imagenes asociadas al equipo.
 $consulta = $pdo->prepare(
     'SELECT id

@@ -7,6 +7,9 @@ requerirRol(['administrador', 'operador']);
 // Carga las consultas del modulo de equipos.
 require_once __DIR__ . '/../../includes/equipos.php';
 
+// Carga las funciones para consultar los equipos recientes.
+require_once __DIR__ . '/../../includes/equipos_recientes.php';
+
 // Lee el texto enviado desde el buscador.
 $busqueda = $_GET['buscar'] ?? '';
 
@@ -123,6 +126,13 @@ unset($_SESSION['equipo_mensaje']);
 
 // Determina si se muestran las opciones administrativas.
 $esAdministrador = $_SESSION['usuario_rol'] === 'administrador';
+
+// Consulta los equipos recientes del operador.
+$recientes = [];
+
+if ($_SESSION['usuario_rol'] === 'operador') {
+    $recientes = listarEquiposRecientes($pdo, (int) $_SESSION['usuario_id']);
+}
 ?>
 <!DOCTYPE html>
 <!-- Define el idioma del documento. -->
@@ -157,6 +167,24 @@ $esAdministrador = $_SESSION['usuario_rol'] === 'administrador';
     <p>
         <a href="/pages/inicio.php">Volver al inicio</a>
     </p>
+
+    <!-- Muestra los equipos recientes cuando el operador ya tiene visitas. -->
+    <?php if ($recientes !== []): ?>
+        <section>
+            <h2>Equipos recientes</h2>
+            <ul>
+                <!-- Agrega un enlace al detalle de cada equipo reciente. -->
+                <?php foreach ($recientes as $reciente): ?>
+                    <li>
+                        <a href="/pages/equipo_detalle.php?id=<?= (int) $reciente['id'] ?>">
+                            <?= escapar($reciente['codigo']) ?> —
+                            <?= escapar($reciente['nombre']) ?>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </section>
+    <?php endif; ?>
 
     <!-- Usa GET porque solamente consulta datos. -->
     <form action="/pages/equipos.php" method="get">
