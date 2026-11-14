@@ -1,6 +1,6 @@
 SIGEL — Sistema de Gestión de Préstamo de Equipos de Laboratorio
 Proyecto 1 de Programación en Ambiente Web I, ISW-613.
-Universidad Técnica Nacional — Ingeniería del Software.
+Universidad Técnica Nacional.
 Estudiante: Ericka Cordero.
 Descripción
 Aplicación web para gestionar equipos y préstamos de un laboratorio universitario. Se desarrolla con PHP 8.x y MySQL/MariaDB, sin frameworks ni librerías de terceros en el código de la aplicación.
@@ -243,6 +243,17 @@ Las ediciones y eliminaciones bloquean la fila mediante FOR UPDATE durante la tr
 La auditoría comienza desde su integración. No se reconstruyen eventos anteriores sin información fiable. Git y el README documentan los avances de programación; la bitácora documenta operaciones dentro de SIGEL.
 
 La bitácora también registra cambios de equipos, cargas de imágenes y operaciones de préstamos. La eliminación lógica de equipos quedó verificada en phpMyAdmin.
+
+## Reporte de equipos más prestados
+
+El administrador puede consultar un rango inclusivo de fechas.
+El reporte cuenta préstamos entregados y devueltos según la
+fecha de inicio programada y ordena los equipos por total.
+
+La descarga CSV utiliza los mismos filtros y resultados.
+Se genera con `fputcsv()` en UTF-8 y protege los textos que
+podrían interpretarse como fórmulas en una hoja de cálculo. 
+
 Pruebas y validación
 Evidencias registradas durante el desarrollo
 - Conexión PDO y funcionamiento del virtual host.
@@ -269,7 +280,6 @@ Pendientes
 - Implementar eliminación lógica de usuarios con permiso, CSRF, transacción y bitácora.
 - Agregar selector de cantidad y cookie validada al listado de usuarios.
 - Implementar «Recordarme» con selector/validador, hash del validador, expiración, rotación y revocación al cerrar sesión.
-- Implementar reporte de equipos más prestados por rango de fechas y exportación CSV con fputcsv() y neutralización de fórmulas.
 - Aplicar y comprobar permisos en cada nueva página y acción.
 - Verificar la configuración PDO: excepciones y preparaciones emuladas desactivadas.
 - Probar una instalación desde cero con los scripts y credenciales documentados.
