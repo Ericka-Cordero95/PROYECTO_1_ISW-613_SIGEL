@@ -38,3 +38,7 @@ require_once __DIR__ . '/csrf.php';
 
 //Carga las funciones para revisar y cerrar la sesion.
 require_once __DIR__ . '/auth.php';
+
+//Carga y comprueba el recordatorio despues de iniciar la sesion.
+require_once __DIR__ . '/recordarme.php';
+recuperarSesionRecordada();

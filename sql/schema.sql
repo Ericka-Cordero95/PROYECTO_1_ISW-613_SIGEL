@@ -68,28 +68,6 @@ CREATE TABLE bitacora (
         ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
 
--- Guarda el historial de operaciones realizadas en el sistema.
-CREATE TABLE bitacora (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT UNSIGNED NOT NULL,
-    accion VARCHAR(30) NOT NULL,
-    entidad VARCHAR(50) NOT NULL,
-    entidad_id INT UNSIGNED NOT NULL,
-    valores_antes JSON NULL,
-    valores_despues JSON NULL,
-    ip VARCHAR(45) NULL,
-    creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    INDEX idx_bitacora_entidad (entidad, entidad_id),
-    INDEX idx_bitacora_usuario_fecha (usuario_id, creado_en),
-
-    CONSTRAINT fk_bitacora_usuario
-        FOREIGN KEY (usuario_id)
-        REFERENCES usuarios (id)
-        ON DELETE RESTRICT
-        ON UPDATE RESTRICT
-) ENGINE=InnoDB;
-
 -- Guarda los datos del inventario de equipos.
 CREATE TABLE equipos (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -161,4 +139,22 @@ CREATE TABLE prestamo_detalle (
         FOREIGN KEY (prestamo_id) REFERENCES prestamos (id),
     CONSTRAINT fk_prestamo_detalle_equipo
         FOREIGN KEY (equipo_id) REFERENCES equipos (id)
+) ENGINE=InnoDB;
+
+-- Guarda los recordatorios. La fecha de vencimiento se almacena en UTC.
+CREATE TABLE auth_tokens (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT UNSIGNED NOT NULL,
+    selector CHAR(18) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    validador_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    expira_en DATETIME NOT NULL,
+
+    CONSTRAINT uq_auth_tokens_selector UNIQUE (selector),
+    INDEX idx_auth_tokens_usuario (usuario_id),
+    INDEX idx_auth_tokens_expiracion (expira_en),
+
+    CONSTRAINT fk_auth_tokens_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+        ON DELETE CASCADE
+        ON UPDATE RESTRICT
 ) ENGINE=InnoDB;

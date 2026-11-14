@@ -14,20 +14,26 @@ validarTokenCsrf();
 
 $correo = $_POST['correo'] ?? null;
 $password = $_POST['password'] ?? null;
+$recordar = $_POST['recordar'] ?? '0';
 
 // Mensaje para datos incorrectos.
 $mensajeError = 'No se pudo iniciar sesión. Revise el correo y la contraseña.';
 
-// Mensaje cuando la cuenta está bloqueada.
+// Mensaje cuando la cuenta esta bloqueada.
 $mensajeBloqueo = 'Alcanzó 3 intentos incorrectos. Espere a que termine el bloqueo de 5 minutos.';
 
 //Comprueba que se recibieron textos.
-if (!is_string($correo) || !is_string($password)) {
+if (
+    !is_string($correo)
+    || !is_string($password)
+    || !is_string($recordar)
+    || !in_array($recordar, ['0', '1'], true)
+) {
     $_SESSION['error_login'] = $mensajeError;
     redirigir('/index.php');
 }
 
-//Quita espacios del correo, pero no de la contraseña.
+//Quita espacios del correo, pero no de la clave.
 $correo = trim($correo);
 
 // Valida los datos tambien en el servidor.
@@ -81,7 +87,7 @@ if ((int) $usuario['bloqueado'] === 1) {
 }
 
 
-//Comprueba si la contraseña es incorrecta.
+//Comprueba si la clave es incorrecta.
 if (!password_verify($password, $usuario['password_hash'])) {
 
     //Limpia los fallos si ya termino un bloqueo anterior.
@@ -141,16 +147,16 @@ $consulta = $pdo->prepare(
 
 $consulta->execute(['id' => $usuario['id']]);
 
-//Cambia el identificador despues de comprobar las credenciales.
-session_regenerate_id(true);
+//Revoca el recordatorio anterior de este navegador.
+revocarRecordatorio($pdo);
 
-//Guarda solo los datos necesarios del usuario.
-$_SESSION['usuario_id'] = (int) $usuario['id'];
-$_SESSION['usuario_nombre'] = $usuario['nombre'];
-$_SESSION['usuario_rol'] = $usuario['rol'];
-$_SESSION['ultima_actividad'] = time();
+//Solo crea una cookie persistente cuando se marca la casilla.
+$selector = null;
 
-//Crea otro token para la sesion autenticada.
-unset($_SESSION['csrf_token']);
+if ($recordar === '1') {
+    $selector = crearRecordatorio($pdo, (int) $usuario['id']);
+}
 
+//Renueva la sesion y descarta el token CSRF anterior.
+iniciarSesionUsuario($usuario, $selector);
 redirigir('/pages/inicio.php');

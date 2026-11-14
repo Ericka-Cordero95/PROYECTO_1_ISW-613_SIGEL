@@ -1,23 +1,46 @@
 <?php
 
-//Borra los datos, vacia los datos de la sesion actual.
+//Inicia una sesion limpia despues de comprobar la identidad.
+function iniciarSesionUsuario(array $usuario, ?string $selector = null): void
+{
+    if (!session_regenerate_id(true)) {
+        throw new RuntimeException('No se pudo renovar la sesion.');
+    }
+
+    //Descarta el token CSRF y los datos de la sesion anterior.
+    $_SESSION = [
+        'usuario_id' => (int) $usuario['id'],
+        'usuario_nombre' => $usuario['nombre'],
+        'usuario_rol' => $usuario['rol'],
+        'ultima_actividad' => time(),
+    ];
+
+    if ($selector !== null) {
+        $_SESSION['recordar_selector'] = $selector;
+    }
+}
+
+//Revoca el recordatorio y destruye la sesion actual.
 function cerrarSesion(): void
 {
-    $_SESSION = [];
+    try {
+        revocarRecordatorio();
+    } finally {
+        //Cierra la sesion aunque falle la revocacion en MySQL.
+        $_SESSION = [];
+        $parametros = session_get_cookie_params();
 
-    $parametros = session_get_cookie_params();
+        setcookie(session_name(), '', [
+            'expires' => time() - 3600,
+            'path' => $parametros['path'],
+            'domain' => $parametros['domain'],
+            'secure' => $parametros['secure'],
+            'httponly' => $parametros['httponly'],
+            'samesite' => $parametros['samesite'],
+        ]);
 
-    //Una fecha pasada hace que el navegador elimine la cookie.
-    setcookie(session_name(), '', [
-        'expires' => time() - 3600,
-        'path' => $parametros['path'],
-        'domain' => $parametros['domain'],
-        'secure' => $parametros['secure'],
-        'httponly' => $parametros['httponly'],
-        'samesite' => $parametros['samesite'],
-    ]);
-
-    session_destroy();
+        session_destroy();
+    }
 }
 
 //Revisa la sesion antes de mostrar una pagina protegida.
@@ -65,11 +88,11 @@ function requerirSesion(): void
     $_SESSION['usuario_rol'] = $usuario['rol'];
     $_SESSION['ultima_actividad'] = $ahora;
 
-    // Evita guardar la página en caché.
+    // Evita guardar la pagina en cache.
     header('Cache-Control: no-store');
 }
 
-// Revisa la sesión y los roles permitidos.
+// Revisa la sesion y los roles permitidos.
 function requerirRol(array $rolesPermitidos): void
 {
     requerirSesion();

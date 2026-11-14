@@ -12,6 +12,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 //Revisa que el envio tenga el token correcto.
 validarTokenCsrf();
 
-//Elimina la sesion y vuelve al login.
+//Revoca el recordatorio, elimina la sesion y vuelve al login.
 cerrarSesion();
 redirigir('/index.php?estado=cerrada');

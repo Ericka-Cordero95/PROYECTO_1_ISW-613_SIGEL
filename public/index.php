@@ -3,6 +3,15 @@
 //Carga las funciones comunes y la sesion.
 require_once __DIR__ . '/../includes/bootstrap.php';
 
+//Si hay una sesion, comprueba su vigencia antes de abrir el inicio.
+if (isset($_SESSION['usuario_id'])) {
+    requerirSesion();
+    redirigir('/pages/inicio.php');
+}
+
+//Evita conservar el formulario y sus mensajes en cache.
+header('Cache-Control: no-store');
+
 // Muestra el mensaje una vez.
 $mensaje = $_SESSION['error_login'] ?? '';
 unset($_SESSION['error_login']);
@@ -61,6 +70,14 @@ if ($mensaje === '' && is_string($estado)) {
                 autocomplete="current-password"
                 required
             >
+        </div>
+
+        <!-- Permite recuperar la sesion en este navegador durante 14 dias. -->
+        <div>
+            <label for="recordar">
+                <input type="checkbox" id="recordar" name="recordar" value="1">
+                Recordarme durante 14 días
+            </label>
         </div>
 
         <button type="submit">Entrar</button>
