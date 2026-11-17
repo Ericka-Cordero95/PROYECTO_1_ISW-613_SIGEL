@@ -4,7 +4,7 @@
 **Carrera:** Ingeniería del Software  
 **Curso:** Programación en Ambiente Web I, ISW-613  
 **Proyecto:** Proyecto 1  
-**Estudiante:** Ericka Cordero
+**Estudiante:** Ericka Cordero Aguero
 
 ## Descripción
 
@@ -101,7 +101,7 @@ El esquema incluye las siguientes tablas:
 | `prestamo_detalle` | Equipos asociados y fecha de devolución. |
 | `auth_tokens` | Tokens de la opción «Recordarme». |
 
-`schema.sql` contiene una sola declaración de `bitacora` e incluye `auth_tokens`. No se debe reimportar el esquema completo sobre una base que ya contiene las tablas.
+El esquema está destinado a una instalación nueva. No se debe reimportar sobre una base que ya contiene las tablas.
 
 ### 5. Configurar la conexión y las carpetas privadas
 
@@ -307,7 +307,7 @@ Durante el desarrollo se registraron las siguientes verificaciones:
 - Eliminación lógica de equipos y registro de su evento en bitácora.
 - Registro inicial de un préstamo con varios equipos.
 
-### Recordarme: pruebas confirmadas en XAMPP
+### Pruebas de Recordarme en XAMPP
 
 | Prueba | Resultado |
 |---|---|
@@ -319,9 +319,9 @@ Durante el desarrollo se registraron las siguientes verificaciones:
 | Consultar el selector después de recuperar la sesión | El selector cambia. |
 | Cerrar sesión y volver a abrir el inicio | Se elimina el token de ese navegador y se solicita ingresar. |
 
-## Pruebas de aceptación para la revisión final
+## Pruebas de aceptación
 
-Realizar estas pruebas sobre una instalación local. Los resultados esperados permiten comprobar el comportamiento antes de entregar; no constituyen una afirmación de que se hayan ejecutado en todas las instalaciones.
+Los siguientes casos describen los datos de prueba y los resultados esperados para comprobar el funcionamiento de SIGEL en un entorno local.
 
 ### Usuarios, categorías y equipos
 
@@ -364,7 +364,7 @@ Ingresar como `operador@sigel.local`, seleccionar como destinatario la cuenta `r
 
 Después de cerrar o cancelar los préstamos de prueba, comprobar Eliminar → Cancelar y Eliminar → Aceptar en los CRUD. Cancelar conserva el registro; aceptar lo oculta y establece `eliminado_en`. En usuarios también se establece `activo = 0`. Las filas y sus eventos deben permanecer en la base de datos.
 
-### Seguridad, auditoría e instalación
+### Seguridad y auditoría
 
 - Enviar un formulario de escritura sin CSRF válido debe rechazarse sin registrar una operación exitosa.
 - Abrir una acción de escritura desde la barra del navegador con el rol autorizado debe responder `405 Método no permitido`.
@@ -372,10 +372,7 @@ Después de cerrar o cancelar los préstamos de prueba, comprobar Eliminar → C
 - Comprobar que los JSON de usuarios en `bitacora` no contienen contraseñas ni hashes.
 - Para la regla 25, agregar temporalmente `ejemplo.com` a `dominios_permitidos`, crear `dominio.final@ejemplo.com`, restaurar la lista y comprobar que se rechazan tanto la edición conservando ese correo como una nueva cuenta con el dominio retirado.
 - Probar «Recordarme» sin marcar la casilla y con una cookie vencida o alterada. Comprobar también cuentas inactivas, eliminadas o bloqueadas y el cierre por inactividad.
-- Repetir una instalación desde cero con `schema.sql`, `seed.sql` y las credenciales documentadas, usando una base de pruebas separada de los datos que se desean conservar.
-- Revisar que `config.local.php`, los errores y las imágenes subidas estén excluidos de Git. No versionar los ZIP utilizados para transferir el proyecto.
-- Verificar el historial incremental de Git en al menos 12 días distintos, según el enunciado. El historial debe conservar las fechas reales de los avances.
-- Preparar la defensa sobre sesiones, cookies, CSRF, sentencias preparadas, traslapes, bloqueos y transacciones. Comprobar que el repositorio se puede clonar e instalar en otro equipo.
+- La configuración privada, los registros de errores y las imágenes subidas deben permanecer excluidos de Git.
 
 ### Resultado de las pruebas finales en XAMPP
 
